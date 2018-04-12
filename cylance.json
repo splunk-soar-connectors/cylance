@@ -20,7 +20,7 @@
         "wheel": [
             {
                 "module": "jwt",
-                "input_file": "wheels/pyjwt/PyJWT-1.6.1-py2.py3-none-any.whl"
+                "input_file": "wheel/PyJWT-1.6.1-py2.py3-none-any.whl"
             }
         ]
     },
