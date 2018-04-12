@@ -259,7 +259,7 @@ class CylanceConnector(BaseConnector):
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
-    def _handle_get_device_threats(self, param):
+    def _handle_get_threats(self, param):
 
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
@@ -590,8 +590,8 @@ class CylanceConnector(BaseConnector):
         elif action_id == 'list_endpoints':
             ret_val = self._handle_list_endpoints(param)
 
-        elif action_id == 'get_device_threats':
-            ret_val = self._handle_get_device_threats(param)
+        elif action_id == 'get_threats':
+            ret_val = self._handle_get_threats(param)
 
         elif action_id == 'get_system_info':
             ret_val = self._handle_get_system_info(param)

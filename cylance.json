@@ -29,24 +29,18 @@
             "description": "The tenant's unique identifier",
             "data_type": "string",
             "required": true,
-            "value_list": [],
-            "default": "",
             "order": 1
         },
         "application_id": {
             "description": "The application's unique identifier",
             "data_type": "string",
             "required": true,
-            "value_list": [],
-            "default": "",
             "order": 2
         },
         "application_secret": {
             "description": "The application's secret to sign the auth token with",
             "data_type": "password",
             "required": true,
-            "value_list": [],
-            "default": "",
             "order": 3
         },
         "region_code": {
@@ -248,8 +242,8 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get device threats",
-            "identifier": "get_device_threats",
+            "action": "get threats",
+            "identifier": "get_threats",
             "description": "Get a list of threats on a specific device",
             "verbose": "",
             "type": "investigate",
@@ -263,8 +257,6 @@
                     "contains": [
                         "cylance device id"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 },
                 "page": {
@@ -444,8 +436,6 @@
                     "contains": [
                         "cylance device id"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -646,8 +636,6 @@
                     "contains": [
                         "sha256"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 },
                 "page": {
@@ -840,7 +828,6 @@
                         "GlobalQuarantine",
                         "GlobalSafe"
                     ],
-                    "default": "",
                     "order": 0
                 },
                 "page": {
@@ -1023,6 +1010,7 @@
         },
         {
             "action": "unblock hash",
+            "undo": "block hash",
             "identifier": "unblock_hash",
             "description": "Unblock the hash",
             "verbose": "",
@@ -1037,8 +1025,6 @@
                     "contains": [
                         "sha256"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 },
                 "list_type": {
@@ -1128,6 +1114,7 @@
         },
         {
             "action": "block hash",
+            "undo": "unblock hash",
             "identifier": "block_hash",
             "description": "Block a file hash",
             "verbose": "",
@@ -1142,8 +1129,6 @@
                     "contains": [
                         "sha256"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 },
                 "reason": {
@@ -1151,7 +1136,6 @@
                     "data_type": "string",
                     "required": true,
                     "primary": false,
-                    "default": "",
                     "order": 1
                 },
                 "list_type": {
@@ -1163,7 +1147,6 @@
                         "GlobalQuarantine",
                         "GlobalSafe"
                     ],
-                    "default": "",
                     "order": 2
                 },
                 "category": {
@@ -1284,15 +1267,13 @@
             "read_only": true,
             "parameters": {
                 "sha256_hash": {
-                    "description": "SHA256 hash of file to download",
+                    "description": "SHA256 hash of file",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
                     "contains": [
                         "sha256"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 }
             },
@@ -1486,7 +1467,7 @@
             "identifier": "update_zone",
             "description": "Update a zone",
             "verbose": "",
-            "type": "investigate",
+            "type": "generic",
             "read_only": false,
             "parameters": {
                 "unique_zone_id": {
@@ -1497,8 +1478,6 @@
                     "contains": [
                         "cylance zone id"
                     ],
-                    "value_list": [],
-                    "default": "",
                     "order": 0
                 },
                 "name": {
@@ -1509,7 +1488,6 @@
                     "contains": [
                         "cylance zone name"
                     ],
-                    "default": "",
                     "order": 1
                 },
                 "policy_id": {
@@ -1520,7 +1498,6 @@
                     "contains": [
                         "cylance policy id"
                     ],
-                    "default": "",
                     "order": 1
                 },
                 "criticality": {
@@ -1533,7 +1510,6 @@
                         "Medium",
                         "High"
                     ],
-                    "default": "",
                     "order": 1
                 }
             },
