@@ -1308,7 +1308,7 @@
                     "data_path": "action_result.parameter.sha256_hash",
                     "data_type": "string",
                     "example_values": [
-                        "EFD5A16B2AA10F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
+                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
                     ],
                     "contains": [
                         "sha256"
