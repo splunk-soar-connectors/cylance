@@ -19,3 +19,8 @@ CYLANCE_JSON_REGION_CODE = "region_code"
 CYLANCE_JSON_TENANT_ID = "tenant_id"
 CYLANCE_JSON_APPLICATION_ID = "application_id"
 CYLANCE_JSON_APPLICATION_SECRET = "application_secret"
+
+CYLANCE_AUTH_TOKEN_ERR = "Could not generate auth token"
+CYLANCE_ACCESS_TOKEN_ERR = "Could not generate access token"
+
+CYLANCE_DOWNLOAD_FILE_ERR = "File cannot be downloaded"

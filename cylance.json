@@ -9,13 +9,21 @@
     "product_name": "CylancePROTECT",
     "product_version_regex": ".*",
     "publisher": "Phantom",
-    "license": "Copyright (c) Phantom, 2018",
+    "license": "Copyright (c) Phantom Cyber Corporation, 2018",
     "app_version": "1.0.0",
     "utctime_updated": "2018-03-31T01:16:21.753782Z",
     "package_name": "phantom_cylance",
     "main_module": "cylance_connector.pyc",
     "min_phantom_version": "3.0.284",
     "app_wizard_version": "1.0.0",
+    "pip_dependencies": {
+        "wheel": [
+            {
+                "module": "jwt",
+                "input_file": "wheels/pyjwt/PyJWT-1.6.1-py2.py3-none-any.whl"
+            }
+        ]
+    },
     "configuration": {
         "tenant_id": {
             "description": "The tenant's unique identifier",
@@ -76,25 +84,343 @@
             "verbose": "",
             "type": "investigate",
             "read_only": true,
-            "parameters": {},
+            "parameters": {
+                "page": {
+                    "description": "The page number to request",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "default": "",
+                    "order": 0
+                },
+                "page_size": {
+                    "description": "The page number of device records to retrieve per page",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "default": "",
+                    "order": 1
+                }
+            },
             "output": [
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        10
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.agent_version",
+                    "data_type": "string",
+                    "example_values": [
+                        "2.0.1480"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_first_registered",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-04T18:28:13"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "7759ff47-3a1b-4b4a-80d9-3fde405faf7b"
+                    ],
+                    "contains": [
+                        "cylance device id"
+                    ],
+                    "column_name": "Device Id",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.*.ip_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "10.16.0.34"
+                    ],
+                    "contains": [
+                        "ip"
+                    ],
+                    "column_name": "IP Address",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.mac_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "C8-2A-14-54-8A-20"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "Herman's Mac mini"
+                    ],
+                    "column_name": "Name",
                     "column_order": 0
                 },
                 {
+                    "data_path": "action_result.data.*.policy.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "73dee1b4-98d2-4728-8ad7-3b374c688c69"
+                    ],
+                    "contains": [
+                        "cylance policy id"
+                    ],
+                    "column_name": "Policy Id",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.policy.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default"
+                    ],
+                    "column_name": "Policy Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "Online"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.num_endpoints",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_pages",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Num endpoints: 1, Total pages: 1"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get device threats",
+            "identifier": "get_device_threats",
+            "description": "Get a list of threats on a specific device",
+            "verbose": "",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "unique_device_id": {
+                    "description": "Device id to get info of",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "cylance device id"
+                    ],
+                    "value_list": [],
+                    "default": "",
+                    "order": 0
+                },
+                "page": {
+                    "description": "The page number to request",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 1
+                },
+                "page_size": {
+                    "description": "The number of device records to retrieve per page",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 2
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        10
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.unique_device_id",
+                    "data_type": "string",
+                    "contains": [
+                        "cylance device id"
+                    ],
+                    "example_values": [
+                        "f20c5afa-7614-46d3-bd54-d555e34b140b"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Malware"
+                    ],
+                    "column_name": "Classification",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.cylance_score",
+                    "data_type": "numeric",
+                    "example_values": [
+                        -1
+                    ],
+                    "column_name": "Cylance Score",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.date_found",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-06T20:54:14"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.file_path",
+                    "data_type": "string",
+                    "example_values": [
+                        "/home/2211.rar|2211/update/server.Dat"
+                    ],
+                    "contains": [
+                        "file name"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.file_status",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "2211.rar|2211/update/server.Dat"
+                    ],
+                    "contains": [
+                        "file name"
+                    ],
+                    "column_name": "File Name",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.sha256",
+                    "data_type": "string",
+                    "example_values": [
+                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ],
+                    "column_name": "Sha256 Hash",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.sub_classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Trojan"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.num_threats",
+                    "data_type": "numeric",
+                    "example_values": [
+                        3
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_pages",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Num threats: 3, Total pages: 1"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "render": {
@@ -110,14 +436,13 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "ip_hostname": {
-                    "description": "Hostname/IP address to get info of",
+                "unique_device_id": {
+                    "description": "Device id to get info of",
                     "data_type": "string",
-                    "required": false,
+                    "required": true,
                     "primary": true,
                     "contains": [
-                        "host name",
-                        "ip"
+                        "cylance device id"
                     ],
                     "value_list": [],
                     "default": "",
@@ -126,32 +451,178 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.parameter.ip_hostname",
-                    "data_type": "string",
-                    "contains": [
-                        "host name",
-                        "ip"
-                    ],
-                    "column_name": "ip_hostname",
-                    "column_order": 0
-                },
-                {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1
+                    "example_values": [
+                        "success"
+                    ]
                 },
                 {
-                    "data_path": "action_result.message",
+                    "data_path": "action_result.parameter.unique_device_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "7759ff47-3a1b-4b4a-80d9-3fde405faf7b"
+                    ],
+                    "contains": [
+                        "cylance device id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.agent_version",
+                    "data_type": "string",
+                    "example_values": [
+                        "2.0.1480"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.background_detection",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_first_registered",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-04T18:28:13"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_last_modified",
                     "data_type": "string"
                 },
                 {
+                    "data_path": "action_result.data.*.date_offline",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.host_name",
+                    "data_type": "string",
+                    "example_values": [
+                        "hermans-mac-mini.local"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "7759ff47-3a1b-4b4a-80d9-3fde405faf7b"
+                    ],
+                    "contains": [
+                        "cylance device id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.ip_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "10.16.0.34"
+                    ],
+                    "contains": [
+                        "ip"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.is_safe",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.last_logged_in_user",
+                    "data_type": "string",
+                    "example_values": [
+                        "herman"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.mac_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "C8-2A-14-54-8A-20"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "Herman's Mac mini"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.os_version",
+                    "data_type": "string",
+                    "example_values": [
+                        "Mac OS X El Capitan 10.11.6"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.policy.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "00000000-0000-0000-0000-000000000000"
+                    ],
+                    "contains": [
+                        "cylance policy id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.policy.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "Online"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.update_available",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.update_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "7759ff47-3a1b-4b4a-80d9-3fde405faf7b"
+                    ],
+                    "contains": [
+                        "cylance device id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Id: 7759ff47-3a1b-4b4a-80d9-3fde405faf7b"
+                    ]
+                },
+                {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "render": {
@@ -167,69 +638,382 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "hash": {
-                    "description": "Hash of the binary or process to hunt",
+                "sha256_hash": {
+                    "description": "Sha256 hash of the file to hunt",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
                     "contains": [
-                        "hash",
-                        "md5",
-                        "sha1",
                         "sha256"
                     ],
                     "value_list": [],
                     "default": "",
                     "order": 0
                 },
-                "range": {
-                    "description": "Range of items to return, for e.g. 0-10",
-                    "data_type": "string",
+                "page": {
+                    "description": "The page number to request",
+                    "data_type": "numeric",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "0-10",
                     "order": 1
+                },
+                "page_size": {
+                    "description": "The number of device records to retrieve per page",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 2
                 }
             },
             "output": [
                 {
-                    "data_path": "action_result.parameter.hash",
-                    "data_type": "string",
-                    "contains": [
-                        "hash",
-                        "md5",
-                        "sha1",
-                        "sha256"
-                    ],
-                    "column_name": "hash",
-                    "column_order": 0
-                },
-                {
-                    "data_path": "action_result.parameter.range",
-                    "data_type": "string",
-                    "contains": [],
-                    "column_name": "range",
-                    "column_order": 1
-                },
-                {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        10
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_type": "string",
+                    "example_values": [
+                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.agent_version",
+                    "data_type": "string",
+                    "example_values": [
+                        "2.0.1480"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_found",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-06T20:54:14"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.file_path",
+                    "data_type": "string",
+                    "example_values": [
+                        "/home/2211.rar|2211/update/server.Dat"
+                    ],
+                    "column_name": "File Path",
                     "column_order": 2
                 },
                 {
+                    "data_path": "action_result.data.*.file_status",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "contains": [
+                        "cylance device id"
+                    ],
+                    "example_values": [
+                        "f20c5afa-7614-46d3-bd54-d555e34b140b"
+                    ],
+                    "column_name": "Device Id",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.ip_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "172.16.95.133"
+                    ],
+                    "contains": [
+                        "ip"
+                    ],
+                    "column_name": "IP Address",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.mac_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "00-0C-29-48-A0-45"
+                    ],
+                    "contains": [
+                        "mac address"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "localhost.localdomain"
+                    ],
+                    "column_name": "Name",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.policy_id",
+                    "data_type": "string",
+                    "contains": [
+                        "cylance policy id"
+                    ],
+                    "example_values": [
+                        "73dee1b4-98d2-4728-8ad7-3b374c688c69"
+                    ],
+                    "column_name": "Policy Id",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.*.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "OnLine"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.num_items",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Num items: 1"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get global list",
+            "identifier": "get_global_list",
+            "description": "Get the global list",
+            "verbose": "",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "list_type_id": {
+                    "description": "The type of the list to retrieve the hashes for",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "value_list": [
+                        "GlobalQuarantine",
+                        "GlobalSafe"
+                    ],
+                    "default": "",
+                    "order": 0
+                },
+                "page": {
+                    "description": "The page number to request",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 1
+                },
+                "page_size": {
+                    "description": "The number of device records to retrieve per page",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 2
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.list_type_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "GlobalQuarantine"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        10
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.added",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-11T04:05:18"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.added_by",
+                    "data_type": "string",
+                    "example_values": [
+                        "85015301-d17e-4b77-b459-707ff310cab2"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.av_industry",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.category",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Malware"
+                    ],
+                    "column_name": "Classification",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.cylance_score",
+                    "data_type": "numeric",
+                    "example_values": [
+                        -0.999
+                    ],
+                    "column_name": "Cylance Score",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.list_type",
+                    "data_type": "string",
+                    "example_values": [
+                        "GlobalQuarantine"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.md5",
+                    "data_type": "string",
+                    "example_values": [
+                        "00BFEFEEEAC3CE8CA86F04B712FF5F05"
+                    ],
+                    "contains": [
+                        "md5"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "711.rar|711/\u670d\u52a1\u5668(Server).exe"
+                    ],
+                    "contains": [
+                        "file name"
+                    ],
+                    "column_name": "File Name",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.reason",
+                    "data_type": "string",
+                    "example_values": [
+                        "Suspicious file"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.sha256",
+                    "data_type": "string",
+                    "example_values": [
+                        "CC0CA86E194D2849C2B6C273C46A6A5D2B4846A72DE50033E8638724CAE07786"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ],
+                    "column_name": "Sha256 Hash",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.*.sub_classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Trojan"
+                    ],
+                    "column_name": "Sub Classification",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.summary.num_items",
+                    "data_type": "numeric",
+                    "example_values": [
+                        2
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Num items: 2"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "render": {
@@ -245,52 +1029,96 @@
             "type": "correct",
             "read_only": false,
             "parameters": {
-                "hash": {
-                    "description": "Hash of file to block",
+                "sha256_hash": {
+                    "description": "The SHA256 hash for the threat",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
                     "contains": [
-                        "md5",
-                        "sha1",
-                        "sha256",
-                        "hash"
+                        "sha256"
                     ],
                     "value_list": [],
                     "default": "",
                     "order": 0
+                },
+                "list_type": {
+                    "description": "The list type to which the threat belongs",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "value_list": [
+                        "GlobalQuarantine",
+                        "GlobalSafe"
+                    ],
+                    "default": "",
+                    "order": 1
                 }
             },
             "output": [
                 {
-                    "data_path": "action_result.parameter.hash",
+                    "data_path": "action_result.status",
                     "data_type": "string",
-                    "contains": [
-                        "md5",
-                        "sha1",
-                        "sha256",
-                        "hash"
+                    "example_values": [
+                        "success"
                     ],
-                    "column_name": "hash",
+                    "column_name": "Status",
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.parameter.list_type",
                     "data_type": "string",
-                    "column_name": "status",
+                    "example_values": [
+                        "GlobalQuarantine"
+                    ],
+                    "column_name": "Hash's Previous List",
                     "column_order": 1
                 },
                 {
+                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_type": "string",
+                    "example_values": [
+                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ],
+                    "column_name": "Sha256 Hash",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.success",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Success: True"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "render": {
@@ -306,130 +1134,140 @@
             "type": "contain",
             "read_only": false,
             "parameters": {
-                "hash": {
-                    "description": "Hash of file to ban/block",
+                "sha256_hash": {
+                    "description": "The SHA256 hash for the threat",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
                     "contains": [
-                        "md5",
-                        "sha1",
-                        "sha256",
-                        "hash"
+                        "sha256"
                     ],
                     "value_list": [],
                     "default": "",
                     "order": 0
                 },
-                "comment": {
-                    "description": "Comment",
+                "reason": {
+                    "description": "The reason why the file was added to the list",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "default": "",
+                    "order": 1
+                },
+                "list_type": {
+                    "description": "The list type to which the threat belongs",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "value_list": [
+                        "GlobalQuarantine",
+                        "GlobalSafe"
+                    ],
+                    "default": "",
+                    "order": 2
+                },
+                "category": {
+                    "description": "Category for Global Safe list type",
+                    "verbose": "This field is required only if the list_type value is Global Safe.",
                     "data_type": "string",
                     "required": false,
                     "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
-                    "order": 1
+                    "value_list": [
+                        "Admin Tool",
+                        "Commerical Software",
+                        "Drivers",
+                        "Internal Application",
+                        "Operating System",
+                        "Security Software",
+                        "None"
+                    ],
+                    "default": "None",
+                    "order": 3
                 }
             },
             "output": [
                 {
-                    "data_path": "action_result.parameter.hash",
+                    "data_path": "action_result.status",
                     "data_type": "string",
-                    "contains": [
-                        "md5",
-                        "sha1",
-                        "sha256",
-                        "hash"
+                    "example_values": [
+                        "success"
                     ],
-                    "column_name": "hash",
+                    "column_name": "Status",
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.parameter.comment",
+                    "data_path": "action_result.parameter.category",
                     "data_type": "string",
-                    "contains": [],
-                    "column_name": "comment",
+                    "example_values": [
+                        "None"
+                    ],
+                    "column_name": "Category",
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.parameter.list_type",
                     "data_type": "string",
-                    "column_name": "status",
+                    "example_values": [
+                        "GlobalQuarantine"
+                    ],
+                    "column_name": "List Type",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.parameter.reason",
+                    "data_type": "string",
+                    "example_values": [
+                        "This is malware"
+                    ],
+                    "column_name": "Reason",
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.message",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "summary.total_objects",
-                    "data_type": "numeric"
-                },
-                {
-                    "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
-                }
-            ],
-            "render": {
-                "type": "table"
-            },
-            "versions": "EQ(*)"
-        },
-        {
-            "action": "get file",
-            "identifier": "get_file",
-            "description": "Download a file and add it to the vault",
-            "verbose": "",
-            "type": "investigate",
-            "read_only": true,
-            "parameters": {
-                "hash": {
-                    "description": "Hash of file/sample to download",
+                    "data_path": "action_result.parameter.sha256_hash",
                     "data_type": "string",
-                    "required": true,
-                    "primary": true,
-                    "contains": [
-                        "md5",
-                        "sha1",
-                        "sha256",
-                        "hash"
+                    "example_values": [
+                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
                     ],
-                    "value_list": [],
-                    "default": "",
-                    "order": 0
-                }
-            },
-            "output": [
-                {
-                    "data_path": "action_result.parameter.hash",
-                    "data_type": "string",
                     "contains": [
-                        "md5",
-                        "sha1",
-                        "sha256",
-                        "hash"
+                        "sha256"
                     ],
-                    "column_name": "hash",
-                    "column_order": 0
+                    "column_name": "Sha256 Hash",
+                    "column_order": 4
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.data",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 1
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.success",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Success: True"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "render": {
@@ -444,25 +1282,626 @@
             "verbose": "",
             "type": "investigate",
             "read_only": true,
-            "parameters": {},
+            "parameters": {
+                "sha256_hash": {
+                    "description": "SHA256 hash of file to download",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "sha256"
+                    ],
+                    "value_list": [],
+                    "default": "",
+                    "order": 0
+                }
+            },
             "output": [
                 {
                     "data_path": "action_result.status",
                     "data_type": "string",
-                    "column_name": "status",
-                    "column_order": 0
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_type": "string",
+                    "example_values": [
+                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.auto_run",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true,
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.av_industry",
+                    "data_type": "string",
+                    "example_values": []
+                },
+                {
+                    "data_path": "action_result.data.*.cert_issuer",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.cert_publisher",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.cert_timestamp",
+                    "data_type": "string",
+                    "example_values": [
+                        "0001-01-01T00:00:00"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Malware"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.cylance_score",
+                    "data_type": "numeric",
+                    "example_values": [
+                        -1
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.detected_by",
+                    "data_type": "string",
+                    "example_values": [
+                        "File Watcher"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.file_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        135301
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.global_quarantined",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.md5",
+                    "data_type": "string",
+                    "example_values": [
+                        "9ECA5D103CD63622B620A93B40C93A78"
+                    ],
+                    "contains": [
+                        "md5"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "2211.rar|2211/update/server.Dat"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.running",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.safelisted",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.sha256",
+                    "data_type": "string",
+                    "example_values": [
+                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.signed",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true,
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.sub_classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Trojan"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.unique_to_cylance",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true,
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.classification",
+                    "data_type": "string",
+                    "example_values": [
+                        "Malware"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Classification: Malware"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "update zone",
+            "identifier": "update_zone",
+            "description": "Update a zone",
+            "verbose": "",
+            "type": "investigate",
+            "read_only": false,
+            "parameters": {
+                "unique_zone_id": {
+                    "description": "Zone id to get info of",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "cylance zone id"
+                    ],
+                    "value_list": [],
+                    "default": "",
+                    "order": 0
+                },
+                "name": {
+                    "description": "The name of the zone",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "cylance zone name"
+                    ],
+                    "default": "",
+                    "order": 1
+                },
+                "policy_id": {
+                    "description": "The uniqe id of the policy assigned to the zone",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "cylance policy id"
+                    ],
+                    "default": "",
+                    "order": 1
+                },
+                "criticality": {
+                    "description": "The value of the zone",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "value_list": [
+                        "Low",
+                        "Medium",
+                        "High"
+                    ],
+                    "default": "",
+                    "order": 1
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ],
+                    "column_name": "Status",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.parameter.criticality",
+                    "data_type": "string",
+                    "example_values": [
+                        "Low"
+                    ],
+                    "column_name": "Updated Criticality",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.parameter.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "test-zone"
+                    ],
+                    "contains": [
+                        "cylance zone name"
+                    ],
+                    "column_name": "Zone Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.parameter.policy_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "73dee1b4-98d2-4728-8ad7-3b374c688c69"
+                    ],
+                    "contains": [
+                        "cylance policy id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.unique_zone_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "61bf0771-5082-41fd-a63d-8157b104073b"
+                    ],
+                    "contains": [
+                        "cylance zone id"
+                    ],
+                    "column_name": "Zone Id",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.zone_updated",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Zone updated: True"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get policies",
+            "identifier": "get_policies",
+            "description": "Get a list of tenant policies",
+            "verbose": "",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "page": {
+                    "description": "The page number to request",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 0
+                },
+                "page_size": {
+                    "description": "The number of device records to retrieve per page",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 1
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        10
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_added",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-11T04:43:56.967"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_modified",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-11T04:43:56.967"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.device_count",
+                    "data_type": "numeric",
+                    "example_values": [
+                        0
+                    ],
+                    "column_name": "Device Count",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "9eff3f0c-069d-43c1-8dae-7ee9b7cdbc7d"
+                    ],
+                    "contains": [
+                        "cylance policy id"
+                    ],
+                    "column_name": "Policy Id",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "admin's policy"
+                    ],
+                    "column_name": "Policy Name",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.zone_count",
+                    "data_type": "numeric",
+                    "example_values": [
+                        0
+                    ],
+                    "column_name": "Zone Count",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.summary.num_policies",
+                    "data_type": "numeric",
+                    "example_values": [
+                        2
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Num policies: 2"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get zones",
+            "identifier": "get_zones",
+            "description": "Get a list of tenant zones",
+            "verbose": "",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "page": {
+                    "description": "The page number to request",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 0
+                },
+                "page_size": {
+                    "description": "The number of device records to retrieve per page",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "order": 1
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.page_size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        10
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.criticality",
+                    "data_type": "string",
+                    "example_values": [
+                        "Normal"
+                    ],
+                    "column_name": "Criticality",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.date_created",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-06T20:40:25"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_modified",
+                    "data_type": "string",
+                    "example_values": [
+                        "2018-04-06T20:40:25"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "d7561d6b-3eff-459b-bde2-3a6eec15b228"
+                    ],
+                    "contains": [
+                        "cylance zone id"
+                    ],
+                    "column_name": "Zone Id",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "test-zone"
+                    ],
+                    "contains": [
+                        "cylance zone name"
+                    ],
+                    "column_name": "Name",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.policy_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "73dee1b4-98d2-4728-8ad7-3b374c688c69"
+                    ],
+                    "contains": [
+                        "cylance policy id"
+                    ],
+                    "column_name": "Policy Id",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.update_type",
+                    "data_type": "string",
+                    "example_values": [
+                        "Production"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.zone_rule_id",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.num_zones",
+                    "data_type": "numeric",
+                    "example_values": [
+                        3
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Num zones: 3"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "render": {

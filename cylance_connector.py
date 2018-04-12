@@ -131,7 +131,7 @@ class CylanceConnector(BaseConnector):
         """
 
         config = self.get_config()
-        self.save_progress("Retrieving access token")
+        self.save_progress("Creating auth token")
 
         timeout = 1800  # 30 minutes from now
         now = datetime.utcnow()
@@ -144,7 +144,7 @@ class CylanceConnector(BaseConnector):
         app_id = config[CYLANCE_JSON_APPLICATION_ID]
         app_secret = config[CYLANCE_JSON_APPLICATION_SECRET]
 
-        AUTH_URL = "https://protectapi.cylance.com/auth/v2/token"
+        auth_url = self._base_url + "/auth/v2/token"
         claims = {
             "exp": epoch_timeout,
             "iat": epoch_time,
@@ -155,29 +155,31 @@ class CylanceConnector(BaseConnector):
         }
 
         try:
-            auth_token = jwt.encode(claims, app_secret, algorithm='HS256')
-        except Exception as e:
-            return (phantom.APP_ERROR, e)
+            encoded = jwt.encode(claims, app_secret, algorithm='HS256')
+        except:
+            return (phantom.APP_ERROR, CYLANCE_AUTH_TOKEN_ERR)
 
-        payload = {"auth_token": auth_token}
-        headers = { "Content-Type": "application/json", "Accept": "application/json" }
+        payload = { "auth_token": encoded }
+        headers = { "Accept": "application/json", "Content-Type": "application/json" }
+
+        self.save_progress("Creating access token")
 
         try:
-            resp = requests.post(AUTH_URL, headers=headers, data=json.dumps(payload))
+            resp = requests.post(auth_url, headers=headers, json=payload)
             access_token = json.loads(resp.text)['access_token']
-        except Exception as e:
-            return (phantom.APP_ERROR, e)
+        except:
+            return (phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
         return (phantom.APP_SUCCESS, access_token)
 
-    def _make_rest_call(self, endpoint, action_result, headers=None, params=None, data=None, method="get"):
+    def _make_rest_call(self, endpoint, action_result, headers=None, params=None, json=None, data=None, method="get"):
 
         config = self.get_config()
 
         ret_val, access_token = self._get_access_token(action_result)
 
         if (phantom.is_fail(ret_val)):
-            return action_result.get_status()
+            return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
         resp_json = None
 
@@ -189,15 +191,16 @@ class CylanceConnector(BaseConnector):
         # Create a URL to connect to
         url = self._base_url + endpoint
 
-        headers = headers.append({
+        headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": "Bearer {}".format(access_token)
-        })
+        }
 
         try:
             r = request_func(
                             url,
+                            json=json,
                             data=data,
                             headers=headers,
                             verify=config.get('verify_server_cert', False),
@@ -209,21 +212,13 @@ class CylanceConnector(BaseConnector):
 
     def _handle_test_connectivity(self, param):
 
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        # NOTE: test connectivity does _NOT_ take any parameters
-        # i.e. the param dictionary passed to this handler will be empty.
-        # Also typically it does not add any data into an action_result either.
-        # The status and progress messages are more important.
-
-        # self.save_progress("Connecting to endpoint")
+        self.save_progress("Connecting to /users/v2 to test connectivity")
         # make rest call
         ret_val, response = self._make_rest_call('/users/v2', action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             self.save_progress("Test Connectivity Failed.")
             return action_result.get_status()
 
@@ -233,332 +228,352 @@ class CylanceConnector(BaseConnector):
 
     def _handle_list_endpoints(self, param):
 
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        """
-        # Access action parameters passed in the 'param' dictionary
-
-        # Required values can be accessed directly
-        required_parameter = param['required_parameter']
-
         # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
+        page = param.get('page')
+        page_size = param.get('page_size')
 
-        """
+        params = dict()
+        if page:
+            params['page'] = page
+        if page_size:
+            params['page_size'] = page_size
+
         # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call('/devices/v2', action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             return action_result.get_status()
 
-        # Now post process the data,  uncomment code as you deem fit
-
         # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
+        for item in response['page_items']:
+            action_result.add_data(item)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        summary['num_endpoints'] = response['total_number_of_items']
+        summary['total_pages'] = response['total_pages']
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS)
 
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
+    def _handle_get_device_threats(self, param):
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        unique_device_id = param['unique_device_id']
+        page = param.get('page')
+        page_size = param.get('page_size')
+
+        params = dict()
+        if page:
+            params['page'] = page
+        if page_size:
+            params['page_size'] = page_size
+
+        # make rest call
+        ret_val, response = self._make_rest_call('/devices/v2/{}/threats'.format(unique_device_id), action_result, params=params, headers=None)
+
+        if (phantom.is_fail(ret_val)):
+            return action_result.get_status()
+
+        # Add the response into the data section
+        for item in response['page_items']:
+            action_result.add_data(item)
+
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['num_threats'] = response['total_number_of_items']
+        summary['total_pages'] = response['total_pages']
+
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_get_system_info(self, param):
 
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        """
-        # Access action parameters passed in the 'param' dictionary
-
         # Required values can be accessed directly
-        required_parameter = param['required_parameter']
+        unique_device_id = param['unique_device_id']
 
-        # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
+        url = '/devices/v2/{}'.format(unique_device_id)
 
-        """
         # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             return action_result.get_status()
 
-        # Now post process the data,  uncomment code as you deem fit
-
         # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
+        action_result.add_data(response)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        summary['is_safe'] = response['is_safe']
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
-
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_hunt_file(self, param):
 
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        """
-        # Access action parameters passed in the 'param' dictionary
+        sha256_hash = param['sha256_hash']
+        page = param.get('page')
+        page_size = param.get('page_size')
 
-        # Required values can be accessed directly
-        required_parameter = param['required_parameter']
+        params = dict()
+        if page:
+            params['page'] = page
+        if page_size:
+            params['page_size'] = page_size
 
-        # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
+        url = '/threats/v2/{}/devices'.format(sha256_hash)
 
-        """
         # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             return action_result.get_status()
 
-        # Now post process the data,  uncomment code as you deem fit
-
         # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
+        for item in response['page_items']:
+            action_result.add_data(item)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        summary['num_items'] = response['total_number_of_items']
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS)
 
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
+    def _handle_get_global_list(self, param):
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        list_type_id = param.get('list_type_id')
+        page = param.get('page')
+        page_size = param.get('page_size')
+
+        params = dict()
+        if list_type_id == 'GlobalQuarantine':
+            params['listTypeId'] = 0
+        elif list_type_id == 'GlobalSafe':
+            params['listTypeId'] = 1
+        if page:
+            params['page'] = page
+        if page_size:
+            params['page_size'] = page_size
+
+        # make rest call
+        ret_val, response = self._make_rest_call('/globallists/v2', action_result, params=params, headers=None)
+
+        if (phantom.is_fail(ret_val)):
+            return action_result.get_status()
+
+        # Add the response into the data section
+        for item in response['page_items']:
+            action_result.add_data(item)
+
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['num_items'] = response['total_number_of_items']
+
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_unblock_hash(self, param):
 
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        """
-        # Access action parameters passed in the 'param' dictionary
+        sha256_hash = param['sha256_hash']
+        list_type = param['list_type']
 
-        # Required values can be accessed directly
-        required_parameter = param['required_parameter']
+        request = {
+            "sha256": sha256_hash,
+            "list_type": list_type
+        }
 
-        # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
-
-        """
         # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call('/globallists/v2', action_result, params=None, json=request, method='delete')
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             return action_result.get_status()
 
-        # Now post process the data,  uncomment code as you deem fit
-
-        # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
+        action_result.add_data(response)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        summary['success'] = True
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
-
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_block_hash(self, param):
 
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        """
-        # Access action parameters passed in the 'param' dictionary
+        sha256_hash = param['sha256_hash']
+        reason = param['reason']
+        list_type = param['list_type']
+        category = param.get('category', 'None')
 
-        # Required values can be accessed directly
-        required_parameter = param['required_parameter']
+        request = {
+            "sha256": sha256_hash,
+            "list_type": list_type,
+            "category": category,
+            "reason": reason
+        }
 
-        # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
-
-        """
         # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call('/globallists/v2', action_result, json=request, method='post')
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             return action_result.get_status()
 
-        # Now post process the data,  uncomment code as you deem fit
-
-        # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
+        action_result.add_data(response)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        summary['success'] = True
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
-
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
-
-    def _handle_get_file(self, param):
-
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
-
-        # Add an action result object to self (BaseConnector) to represent the action for this param
-        action_result = self.add_action_result(ActionResult(dict(param)))
-
-        """
-        # Access action parameters passed in the 'param' dictionary
-
-        # Required values can be accessed directly
-        required_parameter = param['required_parameter']
-
-        # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
-
-        """
-        # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
-
-        if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
-            return action_result.get_status()
-
-        # Now post process the data,  uncomment code as you deem fit
-
-        # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
-
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-        summary['important_data'] = "value"
-
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
-
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_get_file_info(self, param):
 
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        """
-        # Access action parameters passed in the 'param' dictionary
-
         # Required values can be accessed directly
-        required_parameter = param['required_parameter']
+        sha256_hash = param['sha256_hash']
 
-        # Optional values should use the .get() function
-        optional_parameter = param.get('optional_parameter', 'default_value')
-        """
+        url = '/threats/v2/{}'.format(sha256_hash)
 
-        """
         # make rest call
-        ret_val, response = self._make_rest_call('/endpoint', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # so just return from here
             return action_result.get_status()
 
-        # Now post process the data,  uncomment code as you deem fit
-
         # Add the response into the data section
-        # action_result.add_data(response)
-        """
-
-        action_result.add_data({})
+        action_result.add_data(response)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['important_data'] = "value"
+        summary['classification'] = response['classification']
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
-        # return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS)
 
-        # For now return Error with a message, in case of success we don't set the message, but use the summary
-        return action_result.set_status(phantom.APP_ERROR, "Action not yet implemented")
+    def _handle_get_zones(self, param):
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        # Add an action result object to self (BaseConnector) to represent the action for this param
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        # Optional values should use the .get() function
+        page = param.get('page')
+        page_size = param.get('page_size')
+
+        params = dict()
+        if page:
+            params['page'] = page
+        if page_size:
+            params['page_size'] = page_size
+
+        # make rest call
+        ret_val, response = self._make_rest_call('/zones/v2', action_result, params=params, headers=None)
+
+        if (phantom.is_fail(ret_val)):
+            return action_result.get_status()
+
+        # Add the response into the data section
+        for item in response['page_items']:
+            action_result.add_data(item)
+
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['num_zones'] = response['total_number_of_items']
+
+        return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _handle_update_zone(self, param):
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        # Add an action result object to self (BaseConnector) to represent the action for this param
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        # Required values can be accessed directly
+        unique_zone_id = param['unique_zone_id']
+        name = param['name']
+        policy_id = param['policy_id']
+        criticality = param['criticality']
+
+        request = {
+            "name": name,
+            "policy_id": policy_id,
+            "criticality": criticality
+        }
+
+        # make rest call
+        ret_val, response = self._make_rest_call('/zones/v2/{}'.format(unique_zone_id), action_result, json=request, method='put')
+
+        if (phantom.is_fail(ret_val)):
+            return action_result.get_status()
+
+        # Add the response into the data section
+        action_result.add_data(response)
+
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['zone_updated'] = True
+
+        return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _handle_get_policies(self, param):
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        # Add an action result object to self (BaseConnector) to represent the action for this param
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        # Optional values should use the .get() function
+        page = param.get('page')
+        page_size = param.get('page_size')
+
+        params = dict()
+        if page:
+            params['page'] = page
+        if page_size:
+            params['page_size'] = page_size
+
+        # make rest call
+        ret_val, response = self._make_rest_call('/policies/v2', action_result, params=params, headers=None)
+
+        if (phantom.is_fail(ret_val)):
+            return action_result.get_status()
+
+        # Add the response into the data section
+        for item in response['page_items']:
+            action_result.add_data(item)
+
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['num_policies'] = response['total_number_of_items']
+
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def handle_action(self, param):
 
@@ -575,11 +590,17 @@ class CylanceConnector(BaseConnector):
         elif action_id == 'list_endpoints':
             ret_val = self._handle_list_endpoints(param)
 
+        elif action_id == 'get_device_threats':
+            ret_val = self._handle_get_device_threats(param)
+
         elif action_id == 'get_system_info':
             ret_val = self._handle_get_system_info(param)
 
         elif action_id == 'hunt_file':
             ret_val = self._handle_hunt_file(param)
+
+        elif action_id == 'get_global_list':
+            ret_val = self._handle_get_global_list(param)
 
         elif action_id == 'unblock_hash':
             ret_val = self._handle_unblock_hash(param)
@@ -587,11 +608,17 @@ class CylanceConnector(BaseConnector):
         elif action_id == 'block_hash':
             ret_val = self._handle_block_hash(param)
 
-        elif action_id == 'get_file':
-            ret_val = self._handle_get_file(param)
-
         elif action_id == 'get_file_info':
             ret_val = self._handle_get_file_info(param)
+
+        elif action_id == 'get_zones':
+            ret_val = self._handle_get_zones(param)
+
+        elif action_id == 'update_zone':
+            ret_val = self._handle_update_zone(param)
+
+        elif action_id == 'get_policies':
+            ret_val = self._handle_get_policies(param)
 
         return ret_val
 
@@ -599,9 +626,7 @@ class CylanceConnector(BaseConnector):
 
         self._state = self.load_state()
         config = self.get_config()
-
-        # Required values can be accessed directly
-        region_code = config['CYLANCE_JSON_REGION_CODE']
+        region_code = config[CYLANCE_JSON_REGION_CODE]
 
         region_codes = {
             "Asia-Pacific - North": "-apne1",
