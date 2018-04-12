@@ -1259,6 +1259,89 @@
             "versions": "EQ(*)"
         },
         {
+            "action": "get file",
+            "identifier": "get_file",
+            "description": "Get a URL to download a file",
+            "verbose": "The file will download in a password protected zip. The password is 'infected'.",
+            "type": "investigate",
+            "read_only": false,
+            "parameters": {
+                "sha256_hash": {
+                    "description": "Sha256 hash of file to download",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "sha256"
+                    ],
+                    "order": 0
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.url",
+                    "data_type": "string",
+                    "example_values": [
+                        "https://cylanceephemeralfilestore.s3.amazonaws.com/EF/D5/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
+                    ],
+                    "contains": [
+                        "url"
+                    ],
+                    "column_name": "Url",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Password for zip: infected"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_type": "string",
+                    "example_values": [
+                        "EFD5A16B2AA10F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.password_for_zip",
+                    "data_type": "string",
+                    "example_values": [
+                        "infected"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
             "action": "get file info",
             "identifier": "get_file_info",
             "description": "Get information about a file",

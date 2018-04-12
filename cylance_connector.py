@@ -448,6 +448,30 @@ class CylanceConnector(BaseConnector):
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
+    def _handle_get_file(self, param):
+        """ Get a file and download it to the vault. Cylance will give the URL """
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        sha256_hash = param['sha256_hash']
+
+        # make rest call
+        ret_val, response = self._make_rest_call('/threats/v2/download/{}'.format(sha256_hash), action_result, headers=None)
+
+        if (phantom.is_fail(ret_val)):
+            return action_result.get_status()
+
+        # Add the response into the data section
+        action_result.add_data(response)
+
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['password_for_zip'] = "infected"
+
+        return action_result.set_status(phantom.APP_SUCCESS)
+
     def _handle_get_file_info(self, param):
 
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
@@ -607,6 +631,9 @@ class CylanceConnector(BaseConnector):
 
         elif action_id == 'block_hash':
             ret_val = self._handle_block_hash(param)
+
+        elif action_id == 'get_file':
+            ret_val = self._handle_get_file(param)
 
         elif action_id == 'get_file_info':
             ret_val = self._handle_get_file_info(param)
