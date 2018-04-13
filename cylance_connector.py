@@ -410,11 +410,7 @@ class CylanceConnector(BaseConnector):
 
         action_result.add_data(response)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-        summary['success'] = True
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_UNBLOCK_HASH_SUCC)
 
     def _handle_block_hash(self, param):
 
@@ -442,11 +438,7 @@ class CylanceConnector(BaseConnector):
 
         action_result.add_data(response)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-        summary['success'] = True
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_BLOCK_HASH_SUCC)
 
     def _handle_get_file(self, param):
         """ Get a file and download it to the vault. Cylance will give the URL """

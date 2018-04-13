@@ -1079,17 +1079,14 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.success",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true
-                    ]
+                    "data_path": "action_result.summary",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Success: True"
+                        "Successfully unblocked hash"
                     ]
                 },
                 {
@@ -1209,7 +1206,7 @@
                     "data_path": "action_result.parameter.sha256_hash",
                     "data_type": "string",
                     "example_values": [
-                        "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                        "F5DCF6111E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
                     ],
                     "contains": [
                         "sha256"
@@ -1225,17 +1222,14 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.success",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true
-                    ]
+                    "data_path": "action_result.summary",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Success: True"
+                        "Successfully blocked hash"
                     ]
                 },
                 {
@@ -1286,6 +1280,16 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_type": "string",
+                    "example_values": [
+                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
                     "data_path": "action_result.data.*.url",
                     "data_type": "string",
                     "example_values": [
@@ -1298,27 +1302,17 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Password for zip: infected"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.sha256_hash",
-                    "data_type": "string",
-                    "example_values": [
-                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
-                    ],
-                    "contains": [
-                        "sha256"
-                    ]
-                },
-                {
                     "data_path": "action_result.summary.password_for_zip",
                     "data_type": "string",
                     "example_values": [
                         "infected"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Password for zip: infected"
                     ]
                 },
                 {
