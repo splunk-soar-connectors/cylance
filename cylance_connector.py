@@ -16,15 +16,19 @@
 import phantom.app as phantom
 from phantom.base_connector import BaseConnector
 from phantom.action_result import ActionResult
+from phantom.vault import Vault as Vault
 
 # Usage of the consts file is recommended
 from cylance_consts import *
+import os
+import shutil
 import jwt
 import uuid
 import requests
 import json
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from zipfile import ZipFile
 
 
 class RetVal(tuple):
@@ -122,6 +126,54 @@ class CylanceConnector(BaseConnector):
                 r.status_code, r.text.replace('{', '{{').replace('}', '}}'))
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
+
+    def _download_file_to_vault(self, action_result, url, file_name):
+        """ Download a file and add it to the vault """
+
+        guid = uuid.uuid4()
+        tmp_dir = "/vault/tmp/{}".format(guid)
+        zip_path = "{}/{}".format(tmp_dir, file_name)
+
+        try:
+            os.makedirs(tmp_dir)
+        except Exception as e:
+            msg = "Unable to create temporary folder '{}': ".format(tmp_dir)
+            return action_result.set_status(phantom.APP_ERROR, msg, e)
+
+        try:
+            r = requests.get(url)
+        except:
+            return action_result.set_status(phantom.APP_ERROR, "Error downloading file")
+
+        with open(zip_path, 'wb') as f:
+            f.write(r.content)
+            f.close()
+
+        zf = ZipFile(zip_path)
+        ex_name = zf.namelist()[0]
+        vault_path = "{}/{}".format(tmp_dir, ex_name)
+
+        try:
+            # All the zip files are encrypted with the password 'infected'
+            zf.extractall(tmp_dir, pwd='infected')
+        except:
+            return action_result.set_status(phantom.APP_ERROR, "Error extracting zip file")
+
+        vault_ret = Vault.add_attachment(vault_path, self.get_container_id(), file_name=ex_name)
+        if vault_ret.get('succeeded'):
+            action_result.set_status(phantom.APP_SUCCESS, "Transferred file")
+            summary = {
+                    phantom.APP_JSON_VAULT_ID: vault_ret[phantom.APP_JSON_HASH],
+                    phantom.APP_JSON_NAME: ex_name,
+                    phantom.APP_JSON_SIZE: vault_ret.get(phantom.APP_JSON_SIZE)}
+            action_result.update_summary(summary)
+            action_result.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
+        else:
+            action_result.set_status(phantom.APP_ERROR, "Error adding file to vault")
+
+        shutil.rmtree(tmp_dir)
+
+        return action_result.get_status()
 
     def _get_access_token(self, action_result):
         """
@@ -324,7 +376,7 @@ class CylanceConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['sha256_hash']
+        sha256_hash = param['hash']
         page = param.get('page')
         page_size = param.get('page_size')
 
@@ -394,7 +446,7 @@ class CylanceConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['sha256_hash']
+        sha256_hash = param['hash']
         list_type = param['list_type']
 
         request = {
@@ -418,7 +470,7 @@ class CylanceConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['sha256_hash']
+        sha256_hash = param['hash']
         reason = param['reason']
         list_type = param['list_type']
         category = param.get('category', 'None')
@@ -447,7 +499,7 @@ class CylanceConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['sha256_hash']
+        sha256_hash = param['hash']
 
         # make rest call
         ret_val, response = self._make_rest_call('/threats/v2/download/{}'.format(sha256_hash), action_result, headers=None)
@@ -458,11 +510,17 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         action_result.add_data(response)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-        summary['password_for_zip'] = "infected"
+        url = response['url']
+        file_name = '{}.zip'.format(sha256_hash)
 
-        return action_result.set_status(phantom.APP_SUCCESS)
+        ret_val = self._download_file_to_vault(action_result, url, file_name)
+
+        if phantom.is_fail(ret_val):
+            msg = action_result.get_message()
+            action_result.set_status(phantom.APP_ERROR, "Failed to add file to vault: {}".format(msg))
+            return self.set_status(phantom.APP_ERROR)
+
+        return self.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
 
     def _handle_get_file_info(self, param):
 
@@ -472,7 +530,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Required values can be accessed directly
-        sha256_hash = param['sha256_hash']
+        sha256_hash = param['hash']
 
         url = '/threats/v2/{}'.format(sha256_hash)
 
