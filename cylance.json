@@ -80,7 +80,7 @@
             "read_only": true,
             "parameters": {
                 "page": {
-                    "description": "The page number to request",
+                    "description": "Page number to request",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
@@ -88,7 +88,7 @@
                     "order": 0
                 },
                 "page_size": {
-                    "description": "The page number of device records to retrieve per page",
+                    "description": "Page number of device records to retrieve per page",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
@@ -260,14 +260,14 @@
                     "order": 0
                 },
                 "page": {
-                    "description": "The page number to request",
+                    "description": "Page number to request",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
                     "order": 1
                 },
                 "page_size": {
-                    "description": "The number of device records to retrieve per page",
+                    "description": "Number of device records to retrieve per page",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
@@ -628,7 +628,7 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "sha256_hash": {
+                "hash": {
                     "description": "Sha256 hash of the file to hunt",
                     "data_type": "string",
                     "required": true,
@@ -639,14 +639,14 @@
                     "order": 0
                 },
                 "page": {
-                    "description": "The page number to request",
+                    "description": "Page number to request",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
                     "order": 1
                 },
                 "page_size": {
-                    "description": "The number of device records to retrieve per page",
+                    "description": "Number of device records to retrieve per page",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
@@ -676,7 +676,7 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
                         "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
@@ -820,7 +820,7 @@
             "read_only": true,
             "parameters": {
                 "list_type_id": {
-                    "description": "The type of the list to retrieve the hashes for",
+                    "description": "Type of the list to retrieve the hashes for",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -831,14 +831,14 @@
                     "order": 0
                 },
                 "page": {
-                    "description": "The page number to request",
+                    "description": "Page number to request",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
                     "order": 1
                 },
                 "page_size": {
-                    "description": "The number of device records to retrieve per page",
+                    "description": "Number of device records to retrieve per page",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
@@ -1017,8 +1017,8 @@
             "type": "correct",
             "read_only": false,
             "parameters": {
-                "sha256_hash": {
-                    "description": "The SHA256 hash for the threat",
+                "hash": {
+                    "description": "SHA256 hash for the threat",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1028,7 +1028,7 @@
                     "order": 0
                 },
                 "list_type": {
-                    "description": "The list type to which the threat belongs",
+                    "description": "List type to which the threat belongs",
                     "data_type": "string",
                     "required": true,
                     "primary": false,
@@ -1060,7 +1060,7 @@
                     "column_order": 1
                 },
                 {
-                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
                         "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
@@ -1118,8 +1118,8 @@
             "type": "contain",
             "read_only": false,
             "parameters": {
-                "sha256_hash": {
-                    "description": "The SHA256 hash for the threat",
+                "hash": {
+                    "description": "SHA256 hash for the threat",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1129,14 +1129,14 @@
                     "order": 0
                 },
                 "reason": {
-                    "description": "The reason why the file was added to the list",
+                    "description": "Reason why the file was added to the list",
                     "data_type": "string",
                     "required": true,
                     "primary": false,
                     "order": 1
                 },
                 "list_type": {
-                    "description": "The list type to which the threat belongs",
+                    "description": "List type to which the threat belongs",
                     "data_type": "string",
                     "required": true,
                     "primary": false,
@@ -1147,8 +1147,8 @@
                     "order": 2
                 },
                 "category": {
-                    "description": "Category for Global Safe list type",
-                    "verbose": "This field is required only if the list_type value is Global Safe.",
+                    "description": "Category for GlobalSafe list type",
+                    "verbose": "This field is required only if the list_type value is GlobalSafe.",
                     "data_type": "string",
                     "required": false,
                     "primary": false,
@@ -1203,7 +1203,7 @@
                     "column_order": 2
                 },
                 {
-                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
                         "F5DCF6111E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
@@ -1260,7 +1260,7 @@
             "type": "investigate",
             "read_only": false,
             "parameters": {
-                "sha256_hash": {
+                "hash": {
                     "description": "Sha256 hash of file to download",
                     "data_type": "string",
                     "required": true,
@@ -1280,7 +1280,7 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
                         "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
@@ -1294,25 +1294,19 @@
                     "data_type": "string",
                     "example_values": [
                         "https://cylanceephemeralfilestore.s3.amazonaws.com/EF/D5/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
-                    ],
+                   ],
                     "contains": [
-                        "url"
+                        "url",
+                        "domain"
                     ],
                     "column_name": "Url",
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.summary.password_for_zip",
-                    "data_type": "string",
-                    "example_values": [
-                        "infected"
-                    ]
-                },
-                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Password for zip: infected"
+                        "Successfully added file to vault"
                     ]
                 },
                 {
@@ -1327,6 +1321,34 @@
                     "data_type": "numeric",
                     "example_values": [
                         1
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.vault_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "dcf38e99bd2a70a1ea7232ab5e04aca63e535795"
+                    ],
+                    "contains": [
+                        "sha1",
+                        "vault id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        2113536
                     ]
                 }
             ],
@@ -1343,7 +1365,7 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "sha256_hash": {
+                "hash": {
                     "description": "SHA256 hash of file",
                     "data_type": "string",
                     "required": true,
@@ -1363,7 +1385,7 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.sha256_hash",
+                    "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
                         "F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
@@ -1548,7 +1570,7 @@
             "read_only": false,
             "parameters": {
                 "unique_zone_id": {
-                    "description": "Zone id to get info of",
+                    "description": "Zone id to update info of",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1558,7 +1580,7 @@
                     "order": 0
                 },
                 "name": {
-                    "description": "The name of the zone",
+                    "description": "Name of the zone",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1568,7 +1590,7 @@
                     "order": 1
                 },
                 "policy_id": {
-                    "description": "The uniqe id of the policy assigned to the zone",
+                    "description": "Unique id of the policy assigned to the zone",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1578,7 +1600,7 @@
                     "order": 1
                 },
                 "criticality": {
-                    "description": "The value of the zone",
+                    "description": "Value of the zone",
                     "data_type": "string",
                     "required": true,
                     "primary": false,
@@ -1690,14 +1712,14 @@
             "read_only": true,
             "parameters": {
                 "page": {
-                    "description": "The page number to request",
+                    "description": "Page number to request",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
                     "order": 0
                 },
                 "page_size": {
-                    "description": "The number of device records to retrieve per page",
+                    "description": "Number of device records to retrieve per page",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
@@ -1822,14 +1844,14 @@
             "read_only": true,
             "parameters": {
                 "page": {
-                    "description": "The page number to request",
+                    "description": "Page number to request",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
                     "order": 0
                 },
                 "page_size": {
-                    "description": "The number of device records to retrieve per page",
+                    "description": "Number of device records to retrieve per page",
                     "data_type": "numeric",
                     "required": false,
                     "primary": false,
