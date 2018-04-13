@@ -10,8 +10,8 @@
     "product_version_regex": ".*",
     "publisher": "Phantom",
     "license": "Copyright (c) Phantom Cyber Corporation, 2018",
-    "app_version": "1.0.0",
-    "utctime_updated": "2018-03-31T01:16:21.753782Z",
+    "app_version": "1.0.24",
+    "utctime_updated": "2018-04-13T22:51:07.000000Z",
     "package_name": "phantom_cylance",
     "main_module": "cylance_connector.pyc",
     "min_phantom_version": "3.0.284",
@@ -1294,7 +1294,7 @@
                     "data_type": "string",
                     "example_values": [
                         "https://cylanceephemeralfilestore.s3.amazonaws.com/EF/D5/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
-                   ],
+                    ],
                     "contains": [
                         "url",
                         "domain"
