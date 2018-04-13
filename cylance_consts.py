@@ -25,6 +25,3 @@ CYLANCE_ACCESS_TOKEN_ERR = "Could not generate access token"
 
 CYLANCE_BLOCK_HASH_SUCC = "Successfully blocked hash"
 CYLANCE_UNBLOCK_HASH_SUCC = "Successfully unblocked hash"
-
-
-CYLANCE_DOWNLOAD_FILE_ERR = "File cannot be downloaded"
