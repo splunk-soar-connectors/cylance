@@ -25,3 +25,4 @@ CYLANCE_ACCESS_TOKEN_ERR = "Could not generate access token"
 
 CYLANCE_BLOCK_HASH_SUCC = "Successfully blocked hash"
 CYLANCE_UNBLOCK_HASH_SUCC = "Successfully unblocked hash"
+CYLANCE_UPDATE_ZONE_SUCC = "Successfully updated zone"

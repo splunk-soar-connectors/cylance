@@ -1670,17 +1670,17 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary.zone_updated",
-                    "data_type": "boolean",
+                    "data_path": "action_result.summary",
+                    "data_type": "string",
                     "example_values": [
-                        true
+                        ""
                     ]
                 },
                 {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Zone updated: True"
+                        "Successfully updated zone"
                     ]
                 },
                 {
