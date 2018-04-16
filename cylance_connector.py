@@ -262,6 +262,23 @@ class CylanceConnector(BaseConnector):
 
         return self._process_response(r, action_result)
 
+    def _get_additional_results(self, action_result, total_pages, url, params=None, json=None, headers=None):
+        """ By default, results are limited to page 1 and 10 results per page.
+            This function is used to iterate the additional pages if the user didn't specify to see a specific page """
+
+        for curr_page in range(2, total_pages + 1):
+            params['page'] = curr_page
+
+            # make rest call
+            ret_val, response = self._make_rest_call(url, action_result, params=params, json=json, headers=headers)
+
+            if (phantom.is_fail(ret_val)):
+                return action_result.get_status()
+
+            # Add the response into the data section
+            for item in response['page_items']:
+                action_result.add_data(item)
+
     def _handle_test_connectivity(self, param):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
@@ -294,8 +311,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/devices/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/devices/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -303,6 +322,9 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         for item in response['page_items']:
             action_result.add_data(item)
+
+        if not page and response['total_pages'] > 1:
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -327,8 +349,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/devices/v2/{}/threats'.format(unique_device_id)
+
         # make rest call
-        ret_val, response = self._make_rest_call('/devices/v2/{}/threats'.format(unique_device_id), action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -336,6 +360,9 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         for item in response['page_items']:
             action_result.add_data(item)
+
+        if not page and response['total_pages'] > 1:
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -353,10 +380,8 @@ class CylanceConnector(BaseConnector):
         # Required values can be accessed directly
         unique_device_id = param['unique_device_id']
 
-        url = '/devices/v2/{}'.format(unique_device_id)
-
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call('/devices/v2/{}'.format(unique_device_id), action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -398,6 +423,9 @@ class CylanceConnector(BaseConnector):
         for item in response['page_items']:
             action_result.add_data(item)
 
+        if not page and response['total_pages'] > 1:
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
+
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
         summary['num_items'] = response['total_number_of_items']
@@ -424,8 +452,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/globallists/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/globallists/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -433,6 +463,9 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         for item in response['page_items']:
             action_result.add_data(item)
+
+        if not page and response['total_pages'] > 1:
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -532,10 +565,8 @@ class CylanceConnector(BaseConnector):
         # Required values can be accessed directly
         sha256_hash = param['hash']
 
-        url = '/threats/v2/{}'.format(sha256_hash)
-
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call('/threats/v2/{}'.format(sha256_hash), action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -566,8 +597,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/zones/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/zones/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -575,6 +608,9 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         for item in response['page_items']:
             action_result.add_data(item)
+
+        if not page and response['total_pages'] > 1:
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -610,11 +646,7 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         action_result.add_data(response)
 
-        # Add a dictionary that is made up of the most important values from data into the summary
-        summary = action_result.update_summary({})
-        summary['zone_updated'] = True
-
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_UPDATE_ZONE_SUCC)
 
     def _handle_get_policies(self, param):
 
@@ -633,8 +665,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/policies/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/policies/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -642,6 +676,9 @@ class CylanceConnector(BaseConnector):
         # Add the response into the data section
         for item in response['page_items']:
             action_result.add_data(item)
+
+        if not page and response['total_pages'] > 1:
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
