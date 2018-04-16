@@ -311,8 +311,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/devices/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/devices/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -322,7 +324,7 @@ class CylanceConnector(BaseConnector):
             action_result.add_data(item)
 
         if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], '/devices/v2', params=params)
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -347,8 +349,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/devices/v2/{}/threats'.format(unique_device_id)
+
         # make rest call
-        ret_val, response = self._make_rest_call('/devices/v2/{}/threats'.format(unique_device_id), action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -358,7 +362,7 @@ class CylanceConnector(BaseConnector):
             action_result.add_data(item)
 
         if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], '/devices/v2/{}/threats'.format(unique_device_id), params=params)
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -376,10 +380,8 @@ class CylanceConnector(BaseConnector):
         # Required values can be accessed directly
         unique_device_id = param['unique_device_id']
 
-        url = '/devices/v2/{}'.format(unique_device_id)
-
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call('/devices/v2/{}'.format(unique_device_id), action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -409,8 +411,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/threats/v2/{}/devices'.format(sha256_hash)
+
         # make rest call
-        ret_val, response = self._make_rest_call('/threats/v2/{}/devices'.format(sha256_hash), action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -420,7 +424,7 @@ class CylanceConnector(BaseConnector):
             action_result.add_data(item)
 
         if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], '/threats/v2/{}/devices'.format(sha256_hash), params=params)
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -448,8 +452,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/globallists/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/globallists/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -459,7 +465,7 @@ class CylanceConnector(BaseConnector):
             action_result.add_data(item)
 
         if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], '/globallists/v2', params=params)
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -591,8 +597,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/zones/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/zones/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -602,7 +610,7 @@ class CylanceConnector(BaseConnector):
             action_result.add_data(item)
 
         if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], '/zones/v2', params=params)
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
@@ -657,8 +665,10 @@ class CylanceConnector(BaseConnector):
         if page_size:
             params['page_size'] = page_size
 
+        url = '/policies/v2'
+
         # make rest call
-        ret_val, response = self._make_rest_call('/policies/v2', action_result, params=params, headers=None)
+        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -668,7 +678,7 @@ class CylanceConnector(BaseConnector):
             action_result.add_data(item)
 
         if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], '/policies/v2', params=params)
+            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
