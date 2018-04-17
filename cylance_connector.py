@@ -491,6 +491,9 @@ class CylanceConnector(BaseConnector):
         ret_val, response = self._make_rest_call('/globallists/v2', action_result, params=None, json=request, method='delete')
 
         if (phantom.is_fail(ret_val)):
+            message = action_result.get_message()
+            if "There's no entry for this threat" in message:
+                return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_UNBLOCK_HASH_ALREADY_UNBLOCKED_SUCC)
             return action_result.get_status()
 
         action_result.add_data(response)
@@ -519,6 +522,9 @@ class CylanceConnector(BaseConnector):
         ret_val, response = self._make_rest_call('/globallists/v2', action_result, json=request, method='post')
 
         if (phantom.is_fail(ret_val)):
+            message = action_result.get_message()
+            if "There's already an entry for this threat" in message:
+                return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_BLOCK_HASH_ALREADY_BLOCKED_SUCC)
             return action_result.get_status()
 
         action_result.add_data(response)
