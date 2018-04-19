@@ -1,6 +1,6 @@
 {
     "appid": "e297b2aa-e103-4cc3-8cd9-14ee75d60308",
-    "name": "Cylance",
+    "name": "CylancePROTECT",
     "description": "This app supports various investigative, containment, and corrective actions on CylancePROTECT",
     "type": "endpoint",
     "product_vendor": "Cylance",
@@ -629,7 +629,7 @@
             "read_only": true,
             "parameters": {
                 "hash": {
-                    "description": "Sha256 hash of the file to hunt",
+                    "description": "sha256 hash of the file to hunt",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1261,7 +1261,7 @@
             "read_only": false,
             "parameters": {
                 "hash": {
-                    "description": "Sha256 hash of file to download",
+                    "description": "sha256 hash of file to download",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
