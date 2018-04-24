@@ -231,7 +231,7 @@ class CylanceConnector(BaseConnector):
         ret_val, access_token = self._get_access_token(action_result)
 
         if (phantom.is_fail(ret_val)):
-            return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, access_token), None)
 
         resp_json = None
 
