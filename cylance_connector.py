@@ -547,7 +547,7 @@ class CylanceConnector(BaseConnector):
             return action_result.get_status()
 
         # Add the response into the data section
-        action_result.add_data(response)
+        action_result.add_data({})
 
         url = response['url']
         file_name = '{}.zip'.format(sha256_hash)
