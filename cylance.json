@@ -1293,8 +1293,8 @@
                     "data_path": "action_result.data.*.url",
                     "data_type": "string",
                     "example_values": [
-                        "https://cylanceephemeralfilestore.s3.amazonaws.com/EF/D5/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
-                   ],
+                        "https://cylanceephemeralfilestore.s3.amazonaws.com/AF/D9/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
+                    ],
                     "contains": [
                         "url",
                         "domain"
