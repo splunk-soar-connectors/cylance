@@ -1255,8 +1255,8 @@
         {
             "action": "get file",
             "identifier": "get_file",
-            "description": "Get a URL to download a file",
-            "verbose": "The file will download in a password protected zip. The password is 'infected'.",
+            "description": "Add a file to the vault",
+            "verbose": "",
             "type": "investigate",
             "read_only": false,
             "parameters": {
