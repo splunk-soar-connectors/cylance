@@ -1283,7 +1283,7 @@
                     "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
-                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
+                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111"
                     ],
                     "contains": [
                         "sha256"
@@ -1293,7 +1293,7 @@
                     "data_path": "action_result.data.*.url",
                     "data_type": "string",
                     "example_values": [
-                        "https://cylanceephemeralfilestore.s3.amazonaws.com/EF/D5/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
+                        "https://cylanceephemeralfilestore.s3.amazonaws.com/EF/D5/A1/6B/EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111.zip?Signature=nYgnXb4PKQvmQ%2Fc4DvjdPtxcncg%3D&Expires=1523569957&AWSAccessKeyId=AKIAIAD6JC2YTYVBFRFA"
                    ],
                     "contains": [
                         "url",
@@ -1338,7 +1338,7 @@
                     "data_path": "action_result.summary.name",
                     "data_type": "string",
                     "example_values": [
-                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED602"
+                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111"
                     ],
                     "contains": [
                         "sha256"
@@ -1440,7 +1440,9 @@
                     "data_type": "numeric",
                     "example_values": [
                         -1
-                    ]
+                    ],
+                    "column_name": "Cylance Score",
+                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.data.*.detected_by",
@@ -1461,7 +1463,9 @@
                     "data_type": "boolean",
                     "example_values": [
                         true
-                    ]
+                    ],
+                    "column_name": "Global Quarantined",
+                    "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.*.md5",
@@ -1478,7 +1482,9 @@
                     "data_type": "string",
                     "example_values": [
                         "2211.rar|2211/update/server.Dat"
-                    ]
+                    ],
+                    "column_name": "Name",
+                    "column_order": 2
                 },
                 {
                     "data_path": "action_result.data.*.running",
@@ -1517,7 +1523,9 @@
                     "data_type": "string",
                     "example_values": [
                         "Trojan"
-                    ]
+                    ],
+                    "column_name": "Sub Classification",
+                    "column_order": 4
                 },
                 {
                     "data_path": "action_result.data.*.unique_to_cylance",
@@ -1532,7 +1540,9 @@
                     "data_type": "string",
                     "example_values": [
                         "Malware"
-                    ]
+                    ],
+                    "column_name": "Classification",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.message",
