@@ -546,9 +546,6 @@ class CylanceConnector(BaseConnector):
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
 
-        # Add the response into the data section
-        action_result.add_data(response)
-
         url = response['url']
         file_name = '{}.zip'.format(sha256_hash)
 
