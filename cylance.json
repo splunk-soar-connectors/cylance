@@ -1255,7 +1255,7 @@
         {
             "action": "get file",
             "identifier": "get_file",
-            "description": "Add a file to the vault",
+            "description": "Download a file to the vault",
             "verbose": "",
             "type": "investigate",
             "read_only": false,
