@@ -501,7 +501,9 @@
                     ],
                     "contains": [
                         "cylance device id"
-                    ]
+                    ],
+                    "column_name": "Device Id",
+                    "column_order": 3
                 },
                 {
                     "data_path": "action_result.data.*.ip_addresses",
@@ -539,14 +541,18 @@
                     "data_type": "string",
                     "example_values": [
                         "Herman's Mac mini"
-                    ]
+                    ],
+                    "column_name": "Name",
+                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.data.*.os_version",
                     "data_type": "string",
                     "example_values": [
                         "Mac OS X El Capitan 10.11.6"
-                    ]
+                    ],
+                    "column_name": "OS Version",
+                    "column_order": 2
                 },
                 {
                     "data_path": "action_result.data.*.policy.id",
@@ -570,7 +576,9 @@
                     "data_type": "string",
                     "example_values": [
                         "Online"
-                    ]
+                    ],
+                    "column_name": "State",
+                    "column_order": 1
                 },
                 {
                     "data_path": "action_result.data.*.update_available",
