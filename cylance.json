@@ -14,7 +14,7 @@
     "utctime_updated": "2018-05-08T20:37:14.000000Z",
     "package_name": "phantom_cylance",
     "main_module": "cylance_connector.pyc",
-    "min_phantom_version": "3.0.284",
+    "min_phantom_version": "3.5.180",
     "app_wizard_version": "1.0.0",
     "pip_dependencies": {
         "wheel": [
