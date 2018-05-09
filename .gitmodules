@@ -1,4 +1,4 @@
 [submodule "wheel"]
 	path = wheel
-	url = ssh://git@prod-bb-1.phantom.local:7999/per/jwt.git
+	url = ssh://git@bitbucket.phantom.us:7999/per/jwt.git
 	ignore = dirty
