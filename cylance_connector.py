@@ -1,14 +1,10 @@
 # --
 # File: cylance_connector.py
 #
-# Copyright (c) Phantom Cyber Corporation, 2018
+# Copyright (c) 2018-2019 Splunk Inc.
 #
-# This unpublished material is proprietary to Phantom Cyber.
-# All rights reserved. The methods and
-# techniques described herein are considered trade secrets
-# and/or confidential. Reproduction or distribution, in whole
-# or in part, is forbidden except by express written permission
-# of Phantom Cyber.
+# SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
+# without a valid written license from Splunk Inc. is PROHIBITED.
 #
 # --
 
@@ -131,7 +127,13 @@ class CylanceConnector(BaseConnector):
         """ Download a file and add it to the vault """
 
         guid = uuid.uuid4()
-        tmp_dir = "/vault/tmp/{}".format(guid)
+
+        if hasattr(Vault, 'get_vault_tmp_dir'):
+            local_dir = Vault.get_vault_tmp_dir()
+        else:
+            local_dir = '/vault/tmp'
+
+        tmp_dir = local_dir + "/{}".format(guid)
         zip_path = "{}/{}".format(tmp_dir, file_name)
 
         try:
@@ -795,7 +797,7 @@ if __name__ == '__main__':
     if (username and password):
         try:
             print ("Accessing the Login page")
-            r = requests.get("https://127.0.0.1/login", verify=False)
+            r = requests.get(BaseConnector._get_phantom_base_url() + "login", verify=False)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -805,10 +807,10 @@ if __name__ == '__main__':
 
             headers = dict()
             headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = 'https://127.0.0.1/login'
+            headers['Referer'] = BaseConnector._get_phantom_base_url() + 'login'
 
             print ("Logging into Platform to get the session id")
-            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            r2 = requests.post(BaseConnector._get_phantom_base_url() + "login", verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print ("Unable to get session id from the platfrom. Error: " + str(e))
