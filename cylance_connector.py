@@ -751,7 +751,7 @@ class CylanceConnector(BaseConnector):
             "Asia-Pacific - North": "-apne1",
             "Asia-Pacific - Southeast": "-au",
             "Europe - Central": "-euc1",
-            "Government": "-us",
+            "Government": ".us",
             "North America": "",
             "South America": "-sae1"
         }
