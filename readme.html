@@ -7,4 +7,7 @@ SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 without a valid written license from Splunk Inc. is PROHIBITED.
 
 -->
-Be sure to synchronize the time on your Phantom instance and host machine. Cylance uses a time-based authorization.
+<h3>Troubleshooting Connection Issues</h3>
+<p><b>Error - Could not generate access token</b>
+<p>If you see this error be sure to synchronize the time on your Phantom host machine. Cylance uses a time-based authorization and will deny API requests if the clock on your Splunk Phantom server has drifted. For example, the following command can be used to update your system time:
+<p>sudo ntpdate -u ntp.ubuntu.com
