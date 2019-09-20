@@ -131,7 +131,7 @@ class CylanceConnector(BaseConnector):
         if hasattr(Vault, 'get_vault_tmp_dir'):
             local_dir = Vault.get_vault_tmp_dir()
         else:
-            local_dir = '/vault/tmp'
+            local_dir = 'opt/phantom/vault/tmp'
 
         tmp_dir = local_dir + "/{}".format(guid)
         zip_path = "{}/{}".format(tmp_dir, file_name)
@@ -264,23 +264,6 @@ class CylanceConnector(BaseConnector):
 
         return self._process_response(r, action_result)
 
-    def _get_additional_results(self, action_result, total_pages, url, params=None, json=None, headers=None):
-        """ By default, results are limited to page 1 and 10 results per page.
-            This function is used to iterate the additional pages if the user didn't specify to see a specific page """
-
-        for curr_page in range(2, total_pages + 1):
-            params['page'] = curr_page
-
-            # make rest call
-            ret_val, response = self._make_rest_call(url, action_result, params=params, json=json, headers=headers)
-
-            if (phantom.is_fail(ret_val)):
-                return action_result.get_status()
-
-            # Add the response into the data section
-            for item in response['page_items']:
-                action_result.add_data(item)
-
     def _handle_test_connectivity(self, param):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
@@ -297,6 +280,41 @@ class CylanceConnector(BaseConnector):
         self.save_progress("Test Connectivity Passed")
         return action_result.set_status(phantom.APP_SUCCESS)
 
+    def _paginator(self, endpoint, action_result, params=None, limit=None):
+
+        items_list = list()
+
+        # if params:
+        #     params['page'] = DEFAULT_MAX_RESULTS
+        # else:
+        #     payload = self._generate_payload(limit=DEFAULT_MAX_RESULTS)
+
+        # payload['offset'] = offset
+
+        page = 0
+
+        while True:
+            if not params:
+                params = dict()
+            page = page + 1
+            params['page'] = page
+            params['page_size'] = DEFAULT_MAX_RESULTS
+
+            ret_val, response = self._make_rest_call(endpoint, action_result, params=params, headers=None)
+
+            if phantom.is_fail(ret_val):
+                return None
+
+            items_list.extend(response.get("page_items"))
+
+            if limit and len(items_list) >= limit:
+                return items_list[:limit]
+
+            if len(response.get("page_items")) < DEFAULT_MAX_RESULTS:
+                break
+
+        return items_list
+
     def _handle_list_endpoints(self, param):
 
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
@@ -304,34 +322,22 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        page = param.get('page')
-        page_size = param.get('page_size')
-
-        params = dict()
-        if page:
-            params['page'] = page
-        if page_size:
-            params['page_size'] = page_size
+        limit = param.get('limit', None)
 
         url = '/devices/v2'
 
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
+        endpoints = self._paginator(url, action_result, limit=limit)
 
-        if (phantom.is_fail(ret_val)):
+        if endpoints is None:
             return action_result.get_status()
 
-        # Add the response into the data section
-        for item in response['page_items']:
-            action_result.add_data(item)
-
-        if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], url, params=params)
+        for endpoint in endpoints:
+            action_result.add_data(endpoint)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_endpoints'] = response['total_number_of_items']
-        summary['total_pages'] = response['total_pages']
+        summary['num_endpoints'] = len(endpoints)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -342,34 +348,22 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         unique_device_id = param['unique_device_id']
-        page = param.get('page')
-        page_size = param.get('page_size')
-
-        params = dict()
-        if page:
-            params['page'] = page
-        if page_size:
-            params['page_size'] = page_size
+        limit = param.get('limit', None)
 
         url = '/devices/v2/{}/threats'.format(unique_device_id)
 
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
+        threats = self._paginator(url, action_result, limit=limit)
 
-        if (phantom.is_fail(ret_val)):
+        if threats is None:
             return action_result.get_status()
 
-        # Add the response into the data section
-        for item in response['page_items']:
-            action_result.add_data(item)
-
-        if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], url, params=params)
+        for threat in threats:
+            action_result.add_data(threat)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_threats'] = response['total_number_of_items']
-        summary['total_pages'] = response['total_pages']
+        summary['num_threats'] = len(threats)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -404,33 +398,22 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         sha256_hash = param['hash']
-        page = param.get('page')
-        page_size = param.get('page_size')
-
-        params = dict()
-        if page:
-            params['page'] = page
-        if page_size:
-            params['page_size'] = page_size
+        limit = param.get('limit', None)
 
         url = '/threats/v2/{}/devices'.format(sha256_hash)
 
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
+        items = self._paginator(url, action_result, limit=limit)
 
-        if (phantom.is_fail(ret_val)):
+        if items is None:
             return action_result.get_status()
 
-        # Add the response into the data section
-        for item in response['page_items']:
+        for item in items:
             action_result.add_data(item)
-
-        if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_items'] = response['total_number_of_items']
+        summary['num_items'] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -441,37 +424,29 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         list_type_id = param.get('list_type_id')
-        page = param.get('page')
-        page_size = param.get('page_size')
+        limit = param.get('limit', None)
 
         params = dict()
+
         if list_type_id == 'GlobalQuarantine':
             params['listTypeId'] = 0
         elif list_type_id == 'GlobalSafe':
             params['listTypeId'] = 1
-        if page:
-            params['page'] = page
-        if page_size:
-            params['page_size'] = page_size
 
         url = '/globallists/v2'
 
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
+        items = self._paginator(url, action_result, params=params, limit=limit)
 
-        if (phantom.is_fail(ret_val)):
+        if items is None:
             return action_result.get_status()
 
-        # Add the response into the data section
-        for item in response['page_items']:
+        for item in items:
             action_result.add_data(item)
-
-        if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_items'] = response['total_number_of_items']
+        summary['num_items'] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -593,33 +568,22 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        page = param.get('page')
-        page_size = param.get('page_size')
-
-        params = dict()
-        if page:
-            params['page'] = page
-        if page_size:
-            params['page_size'] = page_size
+        limit = param.get('limit', None)
 
         url = '/zones/v2'
 
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
+        items = self._paginator(url, action_result, limit=limit)
 
-        if (phantom.is_fail(ret_val)):
+        if items is None:
             return action_result.get_status()
 
-        # Add the response into the data section
-        for item in response['page_items']:
+        for item in items:
             action_result.add_data(item)
-
-        if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_zones'] = response['total_number_of_items']
+        summary['num_zones'] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -661,33 +625,22 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        page = param.get('page')
-        page_size = param.get('page_size')
-
-        params = dict()
-        if page:
-            params['page'] = page
-        if page_size:
-            params['page_size'] = page_size
+        limit = param.get('limit', None)
 
         url = '/policies/v2'
 
         # make rest call
-        ret_val, response = self._make_rest_call(url, action_result, params=params, headers=None)
+        items = self._paginator(url, action_result, limit=limit)
 
-        if (phantom.is_fail(ret_val)):
+        if items is None:
             return action_result.get_status()
 
-        # Add the response into the data section
-        for item in response['page_items']:
+        for item in items:
             action_result.add_data(item)
-
-        if not page and response['total_pages'] > 1:
-            self._get_additional_results(action_result, response['total_pages'], url, params=params)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_policies'] = response['total_number_of_items']
+        summary['num_policies'] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 

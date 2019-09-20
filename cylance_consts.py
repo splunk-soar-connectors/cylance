@@ -23,3 +23,5 @@ CYLANCE_UNBLOCK_HASH_SUCC = "Successfully unblocked hash"
 CYLANCE_BLOCK_HASH_ALREADY_BLOCKED_SUCC = "Hash is already blocked"
 CYLANCE_UNBLOCK_HASH_ALREADY_UNBLOCKED_SUCC = "Hash is already unblocked"
 CYLANCE_UPDATE_ZONE_SUCC = "Successfully updated zone"
+
+DEFAULT_MAX_RESULTS = 2

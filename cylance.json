@@ -8,13 +8,13 @@
     "logo_dark": "logo_cylance_dark.svg",
     "product_name": "CylancePROTECT",
     "product_version_regex": ".*",
-    "publisher": "Phantom",
+    "publisher": "Splunk",
     "license": "Copyright (c) 2018-2019 Splunk Inc.",
     "app_version": "1.0.37",
     "utctime_updated": "2019-04-26T18:13:12.000000Z",
     "package_name": "phantom_cylance",
     "main_module": "cylance_connector.pyc",
-    "min_phantom_version": "4.0.1068",
+    "min_phantom_version": "4.2.7532",
     "app_wizard_version": "1.0.0",
     "pip_dependencies": {
         "wheel": [
@@ -79,21 +79,11 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
-                    "default": "",
                     "order": 0
-                },
-                "page_size": {
-                    "description": "Page number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "default": "",
-                    "order": 1
                 }
             },
             "output": [
@@ -105,17 +95,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -208,17 +191,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.total_pages",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Num endpoints: 1, Total pages: 1"
+                        "Num endpoints: 1"
                     ]
                 },
                 {
@@ -245,7 +221,6 @@
             "action": "get threats",
             "identifier": "get_threats",
             "description": "Get a list of threats on a specific device",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -259,19 +234,11 @@
                     ],
                     "order": 0
                 },
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 2
                 }
             },
             "output": [
@@ -279,21 +246,15 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -387,17 +348,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.total_pages",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Num threats: 3, Total pages: 1"
+                        "Num threats: 3"
                     ]
                 },
                 {
@@ -646,19 +600,11 @@
                     ],
                     "order": 0
                 },
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 2
                 }
             },
             "output": [
@@ -670,17 +616,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -823,7 +762,6 @@
             "action": "get global list",
             "identifier": "get_global_list",
             "description": "Get the global list",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -838,19 +776,11 @@
                     ],
                     "order": 0
                 },
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 2
                 }
             },
             "output": [
@@ -869,17 +799,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -1725,19 +1648,11 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 0
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 1
                 }
             },
             "output": [
@@ -1749,17 +1664,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -1857,19 +1765,11 @@
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number to results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 0
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 1
                 }
             },
             "output": [
@@ -1881,17 +1781,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
