@@ -55,7 +55,6 @@
                 "North America",
                 "South America"
             ],
-            "default": "",
             "order": 0
         }
     },
@@ -64,7 +63,6 @@
             "action": "test connectivity",
             "identifier": "test_connectivity",
             "description": "Validate the asset configuration for connectivity using supplied configuration",
-            "verbose": "",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -75,7 +73,6 @@
             "action": "list endpoints",
             "identifier": "list_endpoints",
             "description": "List all the endpoints/sensors configured on the device",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -150,7 +147,7 @@
                     "data_path": "action_result.data.*.name",
                     "data_type": "string",
                     "example_values": [
-                        "Herman's Mac mini"
+                        "Test user name"
                     ],
                     "column_name": "Name",
                     "column_order": 0
@@ -378,7 +375,6 @@
             "action": "get system info",
             "identifier": "get_system_info",
             "description": "Get information about an endpoint",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -444,7 +440,7 @@
                     "data_path": "action_result.data.*.host_name",
                     "data_type": "string",
                     "example_values": [
-                        "hermans-mac-mini.local"
+                        "Test-user"
                     ]
                 },
                 {
@@ -480,7 +476,7 @@
                     "data_path": "action_result.data.*.last_logged_in_user",
                     "data_type": "string",
                     "example_values": [
-                        "herman"
+                        "Test"
                     ]
                 },
                 {
@@ -494,7 +490,7 @@
                     "data_path": "action_result.data.*.name",
                     "data_type": "string",
                     "example_values": [
-                        "Herman's Mac mini"
+                        "Test user name"
                     ],
                     "column_name": "Name",
                     "column_order": 0
@@ -586,7 +582,6 @@
             "action": "hunt file",
             "identifier": "hunt_file",
             "description": "Hunt a file on the network using the hash",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -943,8 +938,7 @@
             "action": "unblock hash",
             "undo": "block hash",
             "identifier": "unblock_hash",
-            "description": "Unblock the hash",
-            "verbose": "",
+            "description": "Unblock a file hash",
             "type": "correct",
             "read_only": false,
             "parameters": {
@@ -962,12 +956,10 @@
                     "description": "List type to which the threat belongs",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "GlobalQuarantine",
                         "GlobalSafe"
                     ],
-                    "default": "",
                     "order": 1
                 }
             },
@@ -1045,7 +1037,6 @@
             "undo": "unblock hash",
             "identifier": "block_hash",
             "description": "Block a file hash",
-            "verbose": "",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -1063,14 +1054,12 @@
                     "description": "Reason why the file was added to the list",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "order": 1
                 },
                 "list_type": {
                     "description": "List type to which the threat belongs",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "GlobalQuarantine",
                         "GlobalSafe"
@@ -1082,7 +1071,6 @@
                     "verbose": "This field is required only if the list_type value is GlobalSafe.",
                     "data_type": "string",
                     "required": false,
-                    "primary": false,
                     "value_list": [
                         "Admin Tool",
                         "Commerical Software",
@@ -1187,9 +1175,8 @@
             "action": "get file",
             "identifier": "get_file",
             "description": "Download a file to the vault",
-            "verbose": "",
             "type": "investigate",
-            "read_only": false,
+            "read_only": true,
             "parameters": {
                 "hash": {
                     "description": "sha256 hash of file to download",
@@ -1288,7 +1275,6 @@
             "action": "get file info",
             "identifier": "get_file_info",
             "description": "Get information about a file",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -1502,7 +1488,6 @@
             "action": "update zone",
             "identifier": "update_zone",
             "description": "Update a zone",
-            "verbose": "",
             "type": "generic",
             "read_only": false,
             "parameters": {
@@ -1540,7 +1525,6 @@
                     "description": "Value of the zone",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "Low",
                         "Medium",
@@ -1644,7 +1628,6 @@
             "action": "get policies",
             "identifier": "get_policies",
             "description": "Get a list of tenant policies",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -1761,12 +1744,11 @@
             "action": "get zones",
             "identifier": "get_zones",
             "description": "Get a list of tenant zones",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
                 "limit": {
-                    "description": "Number to results to fetch",
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
                     "order": 0

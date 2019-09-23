@@ -45,13 +45,22 @@ class CylanceConnector(BaseConnector):
         # Do note that the app json defines the asset config, so please
         # modify this as you deem fit.
         self._base_url = None
+        self._access_token = None
 
-    def _process_empty_reponse(self, response, action_result):
+    def _process_empty_response(self, response, action_result):
 
         if response.status_code == 200:
             return RetVal(phantom.APP_SUCCESS, {})
 
-        return RetVal(action_result.set_status(phantom.APP_ERROR, "Empty response and no information in the header"), None)
+        message = "Status code: {}. Empty response and no information in the header".format(response.status_code)
+
+        if response.status_code == 404:
+            message = "{}. {}".format(message, "Please verify the provided input parameters")
+
+        if response.status_code == 401:
+            message = "{}. {}".format(message, "Unauthorized")
+
+        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
     def _process_html_response(self, response, action_result):
 
@@ -106,7 +115,7 @@ class CylanceConnector(BaseConnector):
         if 'json' in r.headers.get('Content-Type', ''):
             return self._process_json_response(r, action_result)
 
-        # Process an HTML resonse, Do this no matter what the api talks.
+        # Process an HTML response, Do this no matter what the api talks.
         # There is a high chance of a PROXY in between phantom and the rest of
         # world, in case of errors, PROXY's return HTML, this function parses
         # the error and adds it to the action_result.
@@ -115,7 +124,7 @@ class CylanceConnector(BaseConnector):
 
         # it's not content-type that is to be parsed, handle an empty response
         if not r.text:
-            return self._process_empty_reponse(r, action_result)
+            return self._process_empty_response(r, action_result)
 
         # everything else is actually an error at this point
         message = "Can't process response from server. Status Code: {0} Data from server: {1}".format(
@@ -179,7 +188,7 @@ class CylanceConnector(BaseConnector):
 
     def _get_access_token(self, action_result):
         """
-        An auth token is first generated using tenant's unique id, application's unique id, and application's secret
+        An auth token is first generated using the tenant's unique id, application's unique id, and application's secret
         A call to the /token endpoint is then made, using the auth token, to generate an access token with a timeout
         The code in _get_access_token() provided by Cylance and modified by Phantom
         """
@@ -211,7 +220,7 @@ class CylanceConnector(BaseConnector):
         try:
             encoded = jwt.encode(claims, app_secret, algorithm='HS256')
         except:
-            return (phantom.APP_ERROR, CYLANCE_AUTH_TOKEN_ERR)
+            return action_result.set_status(phantom.APP_ERROR, CYLANCE_AUTH_TOKEN_ERR)
 
         payload = { "auth_token": encoded }
         headers = { "Accept": "application/json", "Content-Type": "application/json" }
@@ -222,18 +231,52 @@ class CylanceConnector(BaseConnector):
             resp = requests.post(auth_url, headers=headers, json=payload)
             access_token = json.loads(resp.text)['access_token']
         except:
-            return (phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
+            return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
-        return (phantom.APP_SUCCESS, access_token)
+        self._state['_access_token'] = access_token
+        self._access_token = access_token
+        self.save_state(self._state)
 
-    def _make_rest_call(self, endpoint, action_result, headers=None, params=None, json=None, data=None, method="get"):
+        return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _make_rest_call_helper(self, endpoint, action_result, headers=None, params=None, json=None, data=None, method="get"):
+
+        url = "{0}{1}".format(self._base_url, endpoint)
+
+        if not self._access_token:
+            ret_val = self._get_access_token(action_result)
+            if phantom.is_fail(ret_val):
+                return action_result.get_status(), None
+
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(self._access_token)
+        }
+
+        ret_val, resp_json = self._make_rest_call(url, action_result, headers=headers, params=params, data=data, json=json, method=method)
+
+        # If token is expired, generate a new token
+        msg = action_result.get_message()
+
+        if msg and "Unauthorized" in msg:
+            ret_val = self._get_access_token(action_result)
+
+            if phantom.is_fail(ret_val):
+                return action_result.get_status(), None
+
+            headers.update({"Authorization": "Bearer {}".format(self._access_token)})
+
+            ret_val, resp_json = self._make_rest_call(url, action_result, headers=headers, params=params, data=data, json=json, method=method)
+
+        if phantom.is_fail(ret_val):
+            return action_result.get_status(), None
+
+        return phantom.APP_SUCCESS, resp_json
+
+    def _make_rest_call(self, url, action_result, headers=None, params=None, json=None, data=None, method="get"):
 
         config = self.get_config()
-
-        ret_val, access_token = self._get_access_token(action_result)
-
-        if (phantom.is_fail(ret_val)):
-            return RetVal(action_result.set_status(phantom.APP_ERROR, access_token), None)
 
         resp_json = None
 
@@ -241,15 +284,6 @@ class CylanceConnector(BaseConnector):
             request_func = getattr(requests, method)
         except AttributeError:
             return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid method: {0}".format(method)), resp_json)
-
-        # Create a URL to connect to
-        url = self._base_url + endpoint
-
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(access_token)
-        }
 
         try:
             r = request_func(
@@ -268,9 +302,14 @@ class CylanceConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        self.save_progress("Connecting to /users/v2 to test connectivity")
+        self.save_progress("Connecting to the server")
+
+        ret_val = self._get_access_token(action_result)
+
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
         # make rest call
-        ret_val, response = self._make_rest_call('/users/v2', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper('/users/v2', action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
             self.save_progress("Test Connectivity Failed")
@@ -284,14 +323,11 @@ class CylanceConnector(BaseConnector):
 
         items_list = list()
 
-        # if params:
-        #     params['page'] = DEFAULT_MAX_RESULTS
-        # else:
-        #     payload = self._generate_payload(limit=DEFAULT_MAX_RESULTS)
-
-        # payload['offset'] = offset
-
         page = 0
+
+        if limit == 0 or (limit and (not str(limit).isdigit() or limit <= 0)):
+            action_result.set_status(phantom.APP_ERROR, CYLANCE_ERR_INVALID_PARAM.format(param="limit"))
+            return None
 
         while True:
             if not params:
@@ -300,7 +336,7 @@ class CylanceConnector(BaseConnector):
             params['page'] = page
             params['page_size'] = DEFAULT_MAX_RESULTS
 
-            ret_val, response = self._make_rest_call(endpoint, action_result, params=params, headers=None)
+            ret_val, response = self._make_rest_call_helper(endpoint, action_result, params=params, headers=None)
 
             if phantom.is_fail(ret_val):
                 return None
@@ -377,7 +413,7 @@ class CylanceConnector(BaseConnector):
         unique_device_id = param['unique_device_id']
 
         # make rest call
-        ret_val, response = self._make_rest_call('/devices/v2/{}'.format(unique_device_id), action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper('/devices/v2/{}'.format(unique_device_id), action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -465,7 +501,7 @@ class CylanceConnector(BaseConnector):
         }
 
         # make rest call
-        ret_val, response = self._make_rest_call('/globallists/v2', action_result, params=None, json=request, method='delete')
+        ret_val, response = self._make_rest_call_helper('/globallists/v2', action_result, params=None, json=request, method='delete')
 
         if (phantom.is_fail(ret_val)):
             message = action_result.get_message()
@@ -496,7 +532,7 @@ class CylanceConnector(BaseConnector):
         }
 
         # make rest call
-        ret_val, response = self._make_rest_call('/globallists/v2', action_result, json=request, method='post')
+        ret_val, response = self._make_rest_call_helper('/globallists/v2', action_result, json=request, method='post')
 
         if (phantom.is_fail(ret_val)):
             message = action_result.get_message()
@@ -518,7 +554,7 @@ class CylanceConnector(BaseConnector):
         sha256_hash = param['hash']
 
         # make rest call
-        ret_val, response = self._make_rest_call('/threats/v2/download/{}'.format(sha256_hash), action_result, headers=None)
+        ret_val, response = self._make_rest_call_helper('/threats/v2/download/{}'.format(sha256_hash), action_result, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -546,7 +582,7 @@ class CylanceConnector(BaseConnector):
         sha256_hash = param['hash']
 
         # make rest call
-        ret_val, response = self._make_rest_call('/threats/v2/{}'.format(sha256_hash), action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper('/threats/v2/{}'.format(sha256_hash), action_result, params=None, headers=None)
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -607,7 +643,7 @@ class CylanceConnector(BaseConnector):
         }
 
         # make rest call
-        ret_val, response = self._make_rest_call('/zones/v2/{}'.format(unique_zone_id), action_result, json=request, method='put')
+        ret_val, response = self._make_rest_call_helper('/zones/v2/{}'.format(unique_zone_id), action_result, json=request, method='put')
 
         if (phantom.is_fail(ret_val)):
             return action_result.get_status()
@@ -712,6 +748,7 @@ class CylanceConnector(BaseConnector):
         region_code_formatted = region_codes.get(region_code)
 
         self._base_url = "https://protectapi{}.cylance.com".format(region_code_formatted)
+        self._access_token = self._state.get('_access_token', '')
 
         return phantom.APP_SUCCESS
 
