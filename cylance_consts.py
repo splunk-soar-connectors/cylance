@@ -25,4 +25,4 @@ CYLANCE_UNBLOCK_HASH_ALREADY_UNBLOCKED_SUCC = "Hash is already unblocked"
 CYLANCE_UPDATE_ZONE_SUCC = "Successfully updated zone"
 CYLANCE_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
 
-DEFAULT_MAX_RESULTS = 2
+DEFAULT_MAX_RESULTS = 200

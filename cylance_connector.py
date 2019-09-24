@@ -56,8 +56,7 @@ class CylanceConnector(BaseConnector):
 
         if response.status_code == 404:
             message = "{}. {}".format(message, "Please verify the provided input parameters")
-
-        if response.status_code == 401:
+        elif response.status_code == 401:
             message = "{}. {}".format(message, "Unauthorized")
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
@@ -291,7 +290,6 @@ class CylanceConnector(BaseConnector):
                             json=json,
                             data=data,
                             headers=headers,
-                            verify=config.get('verify_server_cert', False),
                             params=params)
         except Exception as e:
             return RetVal(action_result.set_status( phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))), resp_json)
@@ -358,7 +356,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        limit = param.get('limit', None)
+        limit = param.get('limit')
 
         url = '/devices/v2'
 
@@ -384,7 +382,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         unique_device_id = param['unique_device_id']
-        limit = param.get('limit', None)
+        limit = param.get('limit')
 
         url = '/devices/v2/{}/threats'.format(unique_device_id)
 
@@ -434,7 +432,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         sha256_hash = param['hash']
-        limit = param.get('limit', None)
+        limit = param.get('limit')
 
         url = '/threats/v2/{}/devices'.format(sha256_hash)
 
@@ -460,7 +458,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         list_type_id = param.get('list_type_id')
-        limit = param.get('limit', None)
+        limit = param.get('limit')
 
         params = dict()
 
@@ -604,7 +602,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        limit = param.get('limit', None)
+        limit = param.get('limit')
 
         url = '/zones/v2'
 
@@ -661,7 +659,7 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        limit = param.get('limit', None)
+        limit = param.get('limit')
 
         url = '/policies/v2'
 
