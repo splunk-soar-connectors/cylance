@@ -12,7 +12,7 @@
     "license": "Copyright (c) 2018-2019 Splunk Inc.",
     "app_version": "1.0.37",
     "utctime_updated": "2019-04-26T18:13:12.000000Z",
-    "package_name": "phantom_cylance",
+    "package_name": "phantom_cylanceprotect",
     "main_module": "cylance_connector.pyc",
     "min_phantom_version": "4.2.7532",
     "app_wizard_version": "1.0.0",

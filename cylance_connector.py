@@ -275,8 +275,6 @@ class CylanceConnector(BaseConnector):
 
     def _make_rest_call(self, url, action_result, headers=None, params=None, json=None, data=None, method="get"):
 
-        config = self.get_config()
-
         resp_json = None
 
         try:
