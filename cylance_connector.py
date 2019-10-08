@@ -137,7 +137,7 @@ class CylanceConnector(BaseConnector):
         if hasattr(Vault, 'get_vault_tmp_dir'):
             local_dir = Vault.get_vault_tmp_dir()
         else:
-            local_dir = 'opt/phantom/vault/tmp'
+            local_dir = '/opt/phantom/vault/tmp'
 
         tmp_dir = local_dir + "/{}".format(guid)
         zip_path = "{}/{}".format(tmp_dir, file_name)
