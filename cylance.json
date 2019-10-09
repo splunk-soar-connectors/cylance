@@ -1,20 +1,20 @@
 {
     "appid": "e297b2aa-e103-4cc3-8cd9-14ee75d60308",
     "name": "CylancePROTECT",
-    "description": "This app supports various investigative, containment, and corrective actions on CylancePROTECT",
+    "description": "This app supports various investigate, containment, and corrective actions on CylancePROTECT",
     "type": "endpoint",
     "product_vendor": "Cylance",
     "logo": "logo_cylance.svg",
     "logo_dark": "logo_cylance_dark.svg",
     "product_name": "CylancePROTECT",
     "product_version_regex": ".*",
-    "publisher": "Phantom",
-    "license": "Copyright (c) 2018-2019 Splunk Inc.",
+    "publisher": "Splunk",
+    "license": "Copyright (c) 2019 Splunk Inc.",
     "app_version": "1.0.37",
     "utctime_updated": "2019-04-26T18:13:12.000000Z",
-    "package_name": "phantom_cylance",
+    "package_name": "phantom_cylanceprotect",
     "main_module": "cylance_connector.pyc",
-    "min_phantom_version": "4.0.1068",
+    "min_phantom_version": "4.2.7532",
     "app_wizard_version": "1.0.0",
     "pip_dependencies": {
         "wheel": [
@@ -26,19 +26,19 @@
     },
     "configuration": {
         "tenant_id": {
-            "description": "The tenant's unique identifier",
+            "description": "Tenant unique identifier",
             "data_type": "string",
             "required": true,
             "order": 1
         },
         "application_id": {
-            "description": "The application's unique identifier",
+            "description": "Application unique identifier",
             "data_type": "string",
             "required": true,
             "order": 2
         },
         "application_secret": {
-            "description": "The application's secret to sign the auth token with",
+            "description": "Application secret to sign the auth token with",
             "data_type": "password",
             "required": true,
             "order": 3
@@ -55,7 +55,6 @@
                 "North America",
                 "South America"
             ],
-            "default": "",
             "order": 0
         }
     },
@@ -63,8 +62,7 @@
         {
             "action": "test connectivity",
             "identifier": "test_connectivity",
-            "description": "Validate the asset configuration for connectivity using supplied configuration",
-            "verbose": "",
+            "description": "Validate the asset configuration for connectivity using the supplied configuration",
             "type": "test",
             "read_only": true,
             "parameters": {},
@@ -75,25 +73,14 @@
             "action": "list endpoints",
             "identifier": "list_endpoints",
             "description": "List all the endpoints/sensors configured on the device",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
-                    "default": "",
                     "order": 0
-                },
-                "page_size": {
-                    "description": "Page number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "default": "",
-                    "order": 1
                 }
             },
             "output": [
@@ -101,21 +88,15 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -141,7 +122,7 @@
                     "contains": [
                         "cylance device id"
                     ],
-                    "column_name": "Device Id",
+                    "column_name": "Device ID",
                     "column_order": 4
                 },
                 {
@@ -167,7 +148,7 @@
                     "data_path": "action_result.data.*.name",
                     "data_type": "string",
                     "example_values": [
-                        "Herman's Mac mini"
+                        "Test user name"
                     ],
                     "column_name": "Name",
                     "column_order": 0
@@ -181,7 +162,7 @@
                     "contains": [
                         "cylance policy id"
                     ],
-                    "column_name": "Policy Id",
+                    "column_name": "Policy ID",
                     "column_order": 3
                 },
                 {
@@ -208,17 +189,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.total_pages",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Num endpoints: 1, Total pages: 1"
+                        "Num endpoints: 1"
                     ]
                 },
                 {
@@ -242,15 +216,14 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get threats",
+            "action": "list threats",
             "identifier": "get_threats",
-            "description": "Get a list of threats on a specific device",
-            "verbose": "",
+            "description": "Get a list of threats on the specific device",
             "type": "investigate",
             "read_only": true,
             "parameters": {
                 "unique_device_id": {
-                    "description": "Device id to get info of",
+                    "description": "Device ID to get info of",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -259,19 +232,11 @@
                     ],
                     "order": 0
                 },
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 2
                 }
             },
             "output": [
@@ -279,21 +244,15 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -387,17 +346,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.total_pages",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Num threats: 3, Total pages: 1"
+                        "Num threats: 3"
                     ]
                 },
                 {
@@ -424,12 +376,11 @@
             "action": "get system info",
             "identifier": "get_system_info",
             "description": "Get information about an endpoint",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
                 "unique_device_id": {
-                    "description": "Device id to get info of",
+                    "description": "Device ID to get info of",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -444,7 +395,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
@@ -490,7 +442,7 @@
                     "data_path": "action_result.data.*.host_name",
                     "data_type": "string",
                     "example_values": [
-                        "hermans-mac-mini.local"
+                        "Test-user"
                     ]
                 },
                 {
@@ -502,7 +454,7 @@
                     "contains": [
                         "cylance device id"
                     ],
-                    "column_name": "Device Id",
+                    "column_name": "Device ID",
                     "column_order": 3
                 },
                 {
@@ -526,7 +478,7 @@
                     "data_path": "action_result.data.*.last_logged_in_user",
                     "data_type": "string",
                     "example_values": [
-                        "herman"
+                        "Test"
                     ]
                 },
                 {
@@ -540,7 +492,7 @@
                     "data_path": "action_result.data.*.name",
                     "data_type": "string",
                     "example_values": [
-                        "Herman's Mac mini"
+                        "Test user name"
                     ],
                     "column_name": "Name",
                     "column_order": 0
@@ -632,12 +584,11 @@
             "action": "hunt file",
             "identifier": "hunt_file",
             "description": "Hunt a file on the network using the hash",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
                 "hash": {
-                    "description": "sha256 hash of the file to hunt",
+                    "description": "SHA256 hash of the file to hunt",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -646,19 +597,11 @@
                     ],
                     "order": 0
                 },
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 2
                 }
             },
             "output": [
@@ -666,21 +609,15 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -732,7 +669,7 @@
                     "example_values": [
                         "f20c5afa-7614-46d3-bd54-d555e34b140b"
                     ],
-                    "column_name": "Device Id",
+                    "column_name": "Device ID",
                     "column_order": 3
                 },
                 {
@@ -775,7 +712,7 @@
                     "example_values": [
                         "73dee1b4-98d2-4728-8ad7-3b374c688c69"
                     ],
-                    "column_name": "Policy Id",
+                    "column_name": "Policy ID",
                     "column_order": 4
                 },
                 {
@@ -823,7 +760,6 @@
             "action": "get global list",
             "identifier": "get_global_list",
             "description": "Get the global list",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -831,26 +767,17 @@
                     "description": "Type of the list to retrieve the hashes for",
                     "data_type": "string",
                     "required": true,
-                    "primary": true,
                     "value_list": [
                         "GlobalQuarantine",
                         "GlobalSafe"
                     ],
                     "order": 0
                 },
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 1
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 2
                 }
             },
             "output": [
@@ -858,7 +785,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
@@ -869,17 +797,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -902,10 +823,7 @@
                 },
                 {
                     "data_path": "action_result.data.*.category",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.classification",
@@ -946,7 +864,7 @@
                     "data_path": "action_result.data.*.name",
                     "data_type": "string",
                     "example_values": [
-                        "711.rar|711/\u670d\u52a1\u5668(Server).exe"
+                        "711.rar|711/670d52a15668(Server).exe"
                     ],
                     "contains": [
                         "file name"
@@ -1018,10 +936,8 @@
         },
         {
             "action": "unblock hash",
-            "undo": "block hash",
             "identifier": "unblock_hash",
-            "description": "Unblock the hash",
-            "verbose": "",
+            "description": "Unblock a file hash",
             "type": "correct",
             "read_only": false,
             "parameters": {
@@ -1039,12 +955,10 @@
                     "description": "List type to which the threat belongs",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "GlobalQuarantine",
                         "GlobalSafe"
                     ],
-                    "default": "",
                     "order": 1
                 }
             },
@@ -1053,7 +967,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ],
                     "column_name": "Status",
                     "column_order": 0
@@ -1081,10 +996,7 @@
                 },
                 {
                     "data_path": "action_result.data",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.summary",
@@ -1119,10 +1031,9 @@
         },
         {
             "action": "block hash",
-            "undo": "unblock hash",
             "identifier": "block_hash",
             "description": "Block a file hash",
-            "verbose": "",
+            "verbose": "Action parameter 'category' is required only if the list_type value is GlobalSafe.",
             "type": "contain",
             "read_only": false,
             "parameters": {
@@ -1140,14 +1051,12 @@
                     "description": "Reason why the file was added to the list",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "order": 1
                 },
                 "list_type": {
                     "description": "List type to which the threat belongs",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "GlobalQuarantine",
                         "GlobalSafe"
@@ -1156,10 +1065,8 @@
                 },
                 "category": {
                     "description": "Category for GlobalSafe list type",
-                    "verbose": "This field is required only if the list_type value is GlobalSafe.",
                     "data_type": "string",
                     "required": false,
-                    "primary": false,
                     "value_list": [
                         "Admin Tool",
                         "Commerical Software",
@@ -1178,7 +1085,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ],
                     "column_name": "Status",
                     "column_order": 0
@@ -1224,10 +1132,7 @@
                 },
                 {
                     "data_path": "action_result.data",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.summary",
@@ -1264,12 +1169,11 @@
             "action": "get file",
             "identifier": "get_file",
             "description": "Download a file to the vault",
-            "verbose": "",
             "type": "investigate",
-            "read_only": false,
+            "read_only": true,
             "parameters": {
                 "hash": {
-                    "description": "sha256 hash of file to download",
+                    "description": "SHA256 hash of file to download",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1284,7 +1188,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
@@ -1299,10 +1204,7 @@
                 },
                 {
                     "data_path": "action_result.data",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -1335,7 +1237,7 @@
                         "sha1",
                         "vault id"
                     ],
-                    "column_name": "Vault Id",
+                    "column_name": "Vault ID",
                     "column_order": 0
                 },
                 {
@@ -1365,7 +1267,6 @@
             "action": "get file info",
             "identifier": "get_file_info",
             "description": "Get information about a file",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -1385,7 +1286,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
@@ -1408,22 +1310,15 @@
                 },
                 {
                     "data_path": "action_result.data.*.av_industry",
-                    "data_type": "string",
-                    "example_values": []
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.cert_issuer",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.cert_publisher",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.cert_timestamp",
@@ -1579,12 +1474,11 @@
             "action": "update zone",
             "identifier": "update_zone",
             "description": "Update a zone",
-            "verbose": "",
             "type": "generic",
             "read_only": false,
             "parameters": {
                 "unique_zone_id": {
-                    "description": "Zone id to update info of",
+                    "description": "Zone ID to update info of",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1604,26 +1498,25 @@
                     "order": 1
                 },
                 "policy_id": {
-                    "description": "Unique id of the policy assigned to the zone",
+                    "description": "Unique ID of the policy assigned to the zone",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
                     "contains": [
                         "cylance policy id"
                     ],
-                    "order": 1
+                    "order": 2
                 },
                 "criticality": {
                     "description": "Value of the zone",
                     "data_type": "string",
                     "required": true,
-                    "primary": false,
                     "value_list": [
                         "Low",
                         "Medium",
                         "High"
                     ],
-                    "order": 1
+                    "order": 3
                 }
             },
             "output": [
@@ -1631,7 +1524,8 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ],
                     "column_name": "Status",
                     "column_order": 0
@@ -1676,7 +1570,7 @@
                     "contains": [
                         "cylance zone id"
                     ],
-                    "column_name": "Zone Id",
+                    "column_name": "Zone ID",
                     "column_order": 3
                 },
                 {
@@ -1685,10 +1579,7 @@
                 },
                 {
                     "data_path": "action_result.summary",
-                    "data_type": "string",
-                    "example_values": [
-                        ""
-                    ]
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -1718,26 +1609,17 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get policies",
+            "action": "list policies",
             "identifier": "get_policies",
             "description": "Get a list of tenant policies",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 0
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 1
                 }
             },
             "output": [
@@ -1745,21 +1627,15 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -1794,7 +1670,7 @@
                     "contains": [
                         "cylance policy id"
                     ],
-                    "column_name": "Policy Id",
+                    "column_name": "Policy ID",
                     "column_order": 3
                 },
                 {
@@ -1850,26 +1726,17 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get zones",
+            "action": "list zones",
             "identifier": "get_zones",
             "description": "Get a list of tenant zones",
-            "verbose": "",
             "type": "investigate",
             "read_only": true,
             "parameters": {
-                "page": {
-                    "description": "Page number to request",
+                "limit": {
+                    "description": "Number of results to fetch",
                     "data_type": "numeric",
                     "required": false,
-                    "primary": false,
                     "order": 0
-                },
-                "page_size": {
-                    "description": "Number of device records to retrieve per page",
-                    "data_type": "numeric",
-                    "required": false,
-                    "primary": false,
-                    "order": 1
                 }
             },
             "output": [
@@ -1877,21 +1744,15 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        10
                     ]
                 },
                 {
@@ -1926,7 +1787,7 @@
                     "contains": [
                         "cylance zone id"
                     ],
-                    "column_name": "Zone Id",
+                    "column_name": "Zone ID",
                     "column_order": 2
                 },
                 {
@@ -1950,7 +1811,7 @@
                     "contains": [
                         "cylance policy id"
                     ],
-                    "column_name": "Policy Id",
+                    "column_name": "Policy ID",
                     "column_order": 3
                 },
                 {
