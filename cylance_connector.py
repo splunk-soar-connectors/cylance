@@ -105,9 +105,8 @@ class CylanceConnector(BaseConnector):
             action_result.add_debug_data({'r_status_code': r.status_code})
             action_result.add_debug_data({'r_text': r.text})
             action_result.add_debug_data({'r_headers': r.headers})
-
         # Process each 'Content-Type' of response separately
-
+        
         # Process a json response
         if 'json' in r.headers.get('Content-Type', ''):
             return self._process_json_response(r, action_result)
@@ -227,6 +226,7 @@ class CylanceConnector(BaseConnector):
         try:
             resp = requests.post(auth_url, headers=headers, json=payload)
             access_token = json.loads(resp.text)['access_token']
+            # self.save_progress("Access Token: {}".format(access_token))
         except:
             return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
@@ -237,25 +237,27 @@ class CylanceConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _make_rest_call_helper(self, endpoint, action_result, headers=None, params=None, json=None, data=None, method="get"):
-
         url = "{0}{1}".format(self._base_url, endpoint)
-
+        
         if not self._access_token:
             ret_val = self._get_access_token(action_result)
             if phantom.is_fail(ret_val):
                 return action_result.get_status(), None
 
+        # Uncomment the Authorization token line below
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": "Bearer {}".format(self._access_token)
         }
+        
 
         ret_val, resp_json = self._make_rest_call(url, action_result, headers=headers, params=params, data=data, json=json, method=method)
-
+        # self.save_progress("Response JSON: {}".format(str(resp_json)))
+        # self.save_progress("Return Value: {}".format(str(ret_val)))
         # If token is expired, generate a new token
         msg = action_result.get_message()
-
+        # self.save_progress("Message: {}".format(str(msg)))
         if msg and "Unauthorized" in msg:
             ret_val = self._get_access_token(action_result)
 
@@ -268,7 +270,7 @@ class CylanceConnector(BaseConnector):
 
         if phantom.is_fail(ret_val):
             return action_result.get_status(), None
-
+        # self.save_progress("still working")
         return phantom.APP_SUCCESS, resp_json
 
     def _make_rest_call(self, url, action_result, headers=None, params=None, json=None, data=None, method="get"):
@@ -674,6 +676,46 @@ class CylanceConnector(BaseConnector):
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
+    def _handle_get_device_hostname(self, param):
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        # Add an action result object to self (BaseConnector) to represent the action for this param
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        if param.get('host_name') is None:
+            return action_result.set_status(phantom.APP_ERROR, CYLANCE_ERR_HOSTNAME_DOESNT_EXIST)
+
+        host_name = param.get('host_name')
+
+        url = '/devices/v2/hostname/{}'.format(host_name)
+        # make rest call
+        # items = self._paginator(url, action_result)
+        
+        # Comment the below after testing
+        params = {}
+        ret_val, response = self._make_rest_call_helper(url, action_result, params=params, headers=None)
+        # self.save_progress("Response: {}".format(str(json.dumps(response))))
+        # self.save_progress("Return Value: {}".format(str(response)))
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+        
+        for device in response:
+            action_result.add_data(device)
+
+        # if items is None:
+        #     return action_result.get_status()
+
+        # for item in items:
+        #     action_result.add_data(item)
+
+        
+        # Add a dictionary that is made up of the most important values from data into the summary
+        summary = action_result.update_summary({})
+        summary['num_devices'] = 1
+
+        return action_result.set_status(phantom.APP_SUCCESS)
+
     def handle_action(self, param):
 
         ret_val = phantom.APP_SUCCESS
@@ -722,6 +764,8 @@ class CylanceConnector(BaseConnector):
         elif action_id == 'get_policies':
             ret_val = self._handle_get_policies(param)
 
+        elif action_id == 'get_device_hostname':
+            ret_val = self._handle_get_device_hostname(param)
         return ret_val
 
     def initialize(self):
@@ -740,10 +784,11 @@ class CylanceConnector(BaseConnector):
         }
 
         region_code_formatted = region_codes.get(region_code)
-
+        # Change the Base URL when submitting the app
         self._base_url = "https://protectapi{}.cylance.com".format(region_code_formatted)
         self._access_token = self._state.get('_access_token', '')
-
+        # self.save_progress("self Access Token: {}".format(str(self._access_token)))
+        # self.save_progress("Base URL: {}".format(self._base_url))
         return phantom.APP_SUCCESS
 
     def finalize(self):

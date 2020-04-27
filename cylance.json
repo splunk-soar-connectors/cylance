@@ -17,12 +17,10 @@
     "min_phantom_version": "4.2.7532",
     "app_wizard_version": "1.0.0",
     "pip_dependencies": {
-        "wheel": [
-            {
-                "module": "jwt",
-                "input_file": "wheel/PyJWT-1.6.1-py2.py3-none-any.whl"
-            }
-        ]
+        "wheel": [{
+            "module": "jwt",
+            "input_file": "wheel/PyJWT-1.6.1-py2.py3-none-any.whl"
+        }]
     },
     "configuration": {
         "tenant_id": {
@@ -58,8 +56,7 @@
             "order": 0
         }
     },
-    "actions": [
-        {
+    "actions": [{
             "action": "test connectivity",
             "identifier": "test_connectivity",
             "description": "Validate the asset configuration for connectivity using the supplied configuration",
@@ -83,8 +80,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -239,8 +235,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -390,8 +385,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -604,8 +598,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -780,8 +773,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -962,8 +954,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1080,8 +1071,7 @@
                     "order": 3
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1183,8 +1173,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1281,8 +1270,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1519,8 +1507,7 @@
                     "order": 3
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1622,8 +1609,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1739,8 +1725,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -1837,6 +1822,223 @@
                     "data_type": "string",
                     "example_values": [
                         "Num zones: 3"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get device hostname",
+            "identifier": "get_device_hostname",
+            "description": "Request a specific device resource belonging to a tenant by using the hostname of the device",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "host_name": {
+                    "description": "device hostname {dns name}",
+                    "data_type": "string",
+                    "required": true,
+                    "order": 0
+                }
+            },
+            "output": [{
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.host_name",
+                    "data_type": "string",
+                    "example_values": [
+                        "User-Laptop-A123",
+                        "hostname.domain.com"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.agent_version",
+                    "data_type": "string",
+                    "example_values": [
+                        "2.0.1480"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "7759ff47-3a1b-4b4a-80d9-3fde405faf7b"
+                    ],
+                    "contains": [
+                        "cylance device id"
+                    ],
+                    "column_name": "Device ID",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.ip_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "10.16.0.34"
+                    ],
+                    "contains": [
+                        "ip"
+                    ],
+                    "column_name": "IP Address",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.data.*.mac_addresses",
+                    "data_type": "string",
+                    "example_values": [
+                        "C8-2A-14-54-8A-20"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "Test user name"
+                    ],
+                    "column_name": "Name",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.policy.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "73dee1b4-98d2-4728-8ad7-3b374c688c69"
+                    ],
+                    "contains": [
+                        "cylance policy id"
+                    ],
+                    "column_name": "Policy ID",
+                    "column_order": 3
+                },
+                {
+                    "data_path": "action_result.data.*.policy.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default"
+                    ],
+                    "column_name": "Policy Name",
+                    "column_order": 4
+                },
+                {
+                    "data_path": "action_result.data.*.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "Online"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.host_name",
+                    "data_type": "string",
+                    "example_values": [
+                        "User-Laptop-A123"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.last_logged_in_user",
+                    "data_type": "string",
+                    "example_values": [
+                        "User-Laptop-A123\\TestUser"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.update_type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.update_available",
+                    "data_type": "boolean",
+                    "example_values": [
+                        "false"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.background_detection",
+                    "data_type": "boolean",
+                    "example_values": [
+                        "false"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.is_safe",
+                    "data_type": "boolean",
+                    "example_values": [
+                        "false"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_first_registered",
+                    "data_type": "string",
+                    "example_values": [
+                        "2019-04-04T16:45:04"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_offline",
+                    "data_type": "string",
+                    "example_values": [
+                        "2019-04-04T16:45:04"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_last_modified",
+                    "data_type": "string",
+                    "example_values": [
+                        "2019-04-04T16:45:04"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.last_logged_in_user",
+                    "data_type": "string",
+                    "example_values": [
+                        "User-Laptop-A123\\TestUser"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.os_version",
+                    "data_type": "string",
+                    "example_values": [
+                        "Microsoft Windows 10 Pro"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.distinguished_name",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.num_devices",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Num devices: 1"
                     ]
                 },
                 {

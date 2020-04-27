@@ -22,5 +22,6 @@ CYLANCE_BLOCK_HASH_ALREADY_BLOCKED_SUCC = "Hash is already blocked"
 CYLANCE_UNBLOCK_HASH_ALREADY_UNBLOCKED_SUCC = "Hash is already unblocked"
 CYLANCE_UPDATE_ZONE_SUCC = "Successfully updated zone"
 CYLANCE_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
+CYLANCE_ERR_HOSTNAME_DOESNT_EXIST = "please check for hostname"
 
 DEFAULT_MAX_RESULTS = 200
