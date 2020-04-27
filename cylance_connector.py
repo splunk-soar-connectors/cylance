@@ -689,28 +689,16 @@ class CylanceConnector(BaseConnector):
         host_name = param.get('host_name')
 
         url = '/devices/v2/hostname/{}'.format(host_name)
-        # make rest call
-        # items = self._paginator(url, action_result)
-        
-        # Comment the below after testing
+
         params = {}
         ret_val, response = self._make_rest_call_helper(url, action_result, params=params, headers=None)
-        # self.save_progress("Response: {}".format(str(json.dumps(response))))
-        # self.save_progress("Return Value: {}".format(str(response)))
+
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         
         for device in response:
             action_result.add_data(device)
 
-        # if items is None:
-        #     return action_result.get_status()
-
-        # for item in items:
-        #     action_result.add_data(item)
-
-        
-        # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
         summary['num_devices'] = 1
 
