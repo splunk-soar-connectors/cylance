@@ -9,7 +9,7 @@
     "product_name": "CylancePROTECT",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) 2019 Splunk Inc.",
+    "license": "Copyright (c) 2018-2020 Splunk Inc.",
     "app_version": "1.0.38",
     "utctime_updated": "2019-10-09T16:46:03.000000Z",
     "package_name": "phantom_cylanceprotect",
