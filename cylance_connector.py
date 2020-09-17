@@ -752,7 +752,7 @@ class CylanceConnector(BaseConnector):
         elif action_id == 'get_policies':
             ret_val = self._handle_get_policies(param)
 
-        elif action_id == 'get_device_hostname':
+        elif action_id == 'get_device':
             ret_val = self._handle_get_device_hostname(param)
         return ret_val
 

@@ -1845,8 +1845,8 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get device hostname",
-            "identifier": "get_device_hostname",
+            "action": "get device",
+            "identifier": "get_device",
             "description": "Request a specific device resource belonging to a tenant by using the hostname of the device",
             "type": "investigate",
             "read_only": true,
