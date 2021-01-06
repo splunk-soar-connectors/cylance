@@ -1,7 +1,7 @@
 {
     "appid": "e297b2aa-e103-4cc3-8cd9-14ee75d60308",
     "name": "CylancePROTECT",
-    "description": "This app supports various investigate, containment, and corrective actions on CylancePROTECT",
+    "description": "This app supports the various investigative, containment, and corrective actions on CylancePROTECT",
     "type": "endpoint",
     "product_vendor": "Cylance",
     "logo": "logo_cylance.svg",
@@ -9,13 +9,17 @@
     "product_name": "CylancePROTECT",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) 2019 Splunk Inc.",
-    "app_version": "1.0.40",
-    "utctime_updated": "2020-12-28T06:24:25.000000Z",
+    "license": "Copyright (c) 2018-2021 Splunk Inc.",
+    "app_version": "2.0.0",
+    "python_version": "3",
+    "utctime_updated": "2019-10-09T16:46:03.000000Z",
     "package_name": "phantom_cylanceprotect",
-    "main_module": "cylance_connector.pyc",
-    "min_phantom_version": "4.2.7532",
+    "main_module": "cylance_connector.py",
+    "min_phantom_version": "4.9.39220",
     "app_wizard_version": "1.0.0",
+    "latest_tested_versions": [
+        ""
+    ],
     "pip_dependencies": {
         "wheel": [
             {
@@ -79,7 +83,6 @@
                 "limit": {
                     "description": "Number of results to fetch",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 0
                 }
             },
@@ -112,6 +115,11 @@
                     "example_values": [
                         "2018-04-04T18:28:13"
                     ]
+                },
+                {
+                    "data_path": "action_result.data.*.date_offline",
+                    "data_type": "string",
+                    "example_value": ""
                 },
                 {
                     "data_path": "action_result.data.*.id",
@@ -154,6 +162,11 @@
                     "column_order": 0
                 },
                 {
+                    "data_path": "action_result.data.*.os_kernel_version",
+                    "data_type": "string",
+                    "example_value": "10.11.0"
+                },
+                {
                     "data_path": "action_result.data.*.policy.id",
                     "data_type": "string",
                     "example_values": [
@@ -173,6 +186,21 @@
                     ],
                     "column_name": "Policy Name",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.data.*.products.*.name",
+                    "data_type": "string",
+                    "example_value": "protect"
+                },
+                {
+                    "data_path": "action_result.data.*.products.*.status",
+                    "data_type": "string",
+                    "example_value": "Online"
+                },
+                {
+                    "data_path": "action_result.data.*.products.*.version",
+                    "data_type": "string",
+                    "example_value": "2.0.1480"
                 },
                 {
                     "data_path": "action_result.data.*.state",
@@ -223,7 +251,7 @@
             "read_only": true,
             "parameters": {
                 "unique_device_id": {
-                    "description": "Device ID to get info of",
+                    "description": "ID of the device to fetch threats",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -235,7 +263,6 @@
                 "limit": {
                     "description": "Number of results to fetch",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 1
                 }
             },
@@ -328,7 +355,7 @@
                     "contains": [
                         "sha256"
                     ],
-                    "column_name": "Sha256 Hash",
+                    "column_name": "SHA256 Hash",
                     "column_order": 3
                 },
                 {
@@ -380,7 +407,7 @@
             "read_only": true,
             "parameters": {
                 "unique_device_id": {
-                    "description": "Device ID to get info of",
+                    "description": "ID of the device to get info",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -437,6 +464,11 @@
                 {
                     "data_path": "action_result.data.*.date_offline",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.distinguished_name",
+                    "data_type": "string",
+                    "example_value": ""
                 },
                 {
                     "data_path": "action_result.data.*.host_name",
@@ -498,6 +530,11 @@
                     "column_order": 0
                 },
                 {
+                    "data_path": "action_result.data.*.os_kernel_version",
+                    "data_type": "string",
+                    "example_value": "10.11.0"
+                },
+                {
                     "data_path": "action_result.data.*.os_version",
                     "data_type": "string",
                     "example_values": [
@@ -522,6 +559,21 @@
                     "example_values": [
                         "Default"
                     ]
+                },
+                {
+                    "data_path": "action_result.data.*.products.*.name",
+                    "data_type": "string",
+                    "example_value": "protect"
+                },
+                {
+                    "data_path": "action_result.data.*.products.*.status",
+                    "data_type": "string",
+                    "example_value": "Online"
+                },
+                {
+                    "data_path": "action_result.data.*.products.*.version",
+                    "data_type": "string",
+                    "example_value": "2.0.1480"
                 },
                 {
                     "data_path": "action_result.data.*.state",
@@ -552,6 +604,11 @@
                     "contains": [
                         "cylance device id"
                     ]
+                },
+                {
+                    "data_path": "action_result.summary.is_safe",
+                    "data_type": "boolean",
+                    "example_value": true
                 },
                 {
                     "data_path": "action_result.message",
@@ -600,7 +657,6 @@
                 "limit": {
                     "description": "Number of results to fetch",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 1
                 }
             },
@@ -614,13 +670,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.limit",
-                    "data_type": "numeric",
-                    "example_values": [
-                        1
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
@@ -628,6 +677,13 @@
                     ],
                     "contains": [
                         "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.limit",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
                     ]
                 },
                 {
@@ -759,12 +815,12 @@
         {
             "action": "get global list",
             "identifier": "get_global_list",
-            "description": "Get the global list",
+            "description": "Retrieve the hashes for the given type of list",
             "type": "investigate",
             "read_only": true,
             "parameters": {
                 "list_type_id": {
-                    "description": "Type of the list to retrieve the hashes for",
+                    "description": "List type of which the threat belongs to",
                     "data_type": "string",
                     "required": true,
                     "value_list": [
@@ -776,7 +832,6 @@
                 "limit": {
                     "description": "Number of results to fetch",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 1
                 }
             },
@@ -790,17 +845,17 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.list_type_id",
-                    "data_type": "string",
-                    "example_values": [
-                        "GlobalQuarantine"
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.list_type_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "GlobalQuarantine"
                     ]
                 },
                 {
@@ -888,7 +943,7 @@
                     "contains": [
                         "sha256"
                     ],
-                    "column_name": "Sha256 Hash",
+                    "column_name": "SHA256 Hash",
                     "column_order": 4
                 },
                 {
@@ -974,15 +1029,6 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.parameter.list_type",
-                    "data_type": "string",
-                    "example_values": [
-                        "GlobalQuarantine"
-                    ],
-                    "column_name": "Hash's Previous List",
-                    "column_order": 1
-                },
-                {
                     "data_path": "action_result.parameter.hash",
                     "data_type": "string",
                     "example_values": [
@@ -991,8 +1037,17 @@
                     "contains": [
                         "sha256"
                     ],
-                    "column_name": "Sha256 Hash",
+                    "column_name": "SHA256 Hash",
                     "column_order": 2
+                },
+                {
+                    "data_path": "action_result.parameter.list_type",
+                    "data_type": "string",
+                    "example_values": [
+                        "GlobalQuarantine"
+                    ],
+                    "column_name": "Hash's Previous List",
+                    "column_order": 1
                 },
                 {
                     "data_path": "action_result.data",
@@ -1066,7 +1121,6 @@
                 "category": {
                     "description": "Category for GlobalSafe list type",
                     "data_type": "string",
-                    "required": false,
                     "value_list": [
                         "Admin Tool",
                         "Commerical Software",
@@ -1101,6 +1155,18 @@
                     "column_order": 1
                 },
                 {
+                    "data_path": "action_result.parameter.hash",
+                    "data_type": "string",
+                    "example_values": [
+                        "F5DCF6111E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ],
+                    "column_name": "SHA256 Hash",
+                    "column_order": 4
+                },
+                {
                     "data_path": "action_result.parameter.list_type",
                     "data_type": "string",
                     "example_values": [
@@ -1117,18 +1183,6 @@
                     ],
                     "column_name": "Reason",
                     "column_order": 2
-                },
-                {
-                    "data_path": "action_result.parameter.hash",
-                    "data_type": "string",
-                    "example_values": [
-                        "F5DCF6111E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044"
-                    ],
-                    "contains": [
-                        "sha256"
-                    ],
-                    "column_name": "Sha256 Hash",
-                    "column_order": 4
                 },
                 {
                     "data_path": "action_result.data",
@@ -1207,6 +1261,36 @@
                     "data_type": "string"
                 },
                 {
+                    "data_path": "action_result.summary.name",
+                    "data_type": "string",
+                    "example_values": [
+                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111"
+                    ],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.size",
+                    "data_type": "numeric",
+                    "example_values": [
+                        2113536
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.vault_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "dcf38e99bd2a70a1ea7232ab5e04aca63e535795"
+                    ],
+                    "contains": [
+                        "sha1",
+                        "vault id"
+                    ],
+                    "column_name": "Vault ID",
+                    "column_order": 0
+                },
+                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
@@ -1225,36 +1309,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.summary.vault_id",
-                    "data_type": "string",
-                    "example_values": [
-                        "dcf38e99bd2a70a1ea7232ab5e04aca63e535795"
-                    ],
-                    "contains": [
-                        "sha1",
-                        "vault id"
-                    ],
-                    "column_name": "Vault ID",
-                    "column_order": 0
-                },
-                {
-                    "data_path": "action_result.summary.name",
-                    "data_type": "string",
-                    "example_values": [
-                        "EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111"
-                    ],
-                    "contains": [
-                        "sha256"
-                    ]
-                },
-                {
-                    "data_path": "action_result.summary.size",
-                    "data_type": "numeric",
-                    "example_values": [
-                        2113536
                     ]
                 }
             ],
@@ -1473,7 +1527,7 @@
         {
             "action": "update zone",
             "identifier": "update_zone",
-            "description": "Update a zone",
+            "description": "Update the details of a zone",
             "type": "generic",
             "read_only": false,
             "parameters": {
@@ -1488,7 +1542,7 @@
                     "order": 0
                 },
                 "name": {
-                    "description": "Name of the zone",
+                    "description": "Name of the zone to be updated",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1498,7 +1552,7 @@
                     "order": 1
                 },
                 "policy_id": {
-                    "description": "Unique ID of the policy assigned to the zone",
+                    "description": "Unique ID of the policy to be assigned to the zone",
                     "data_type": "string",
                     "required": true,
                     "primary": true,
@@ -1508,12 +1562,12 @@
                     "order": 2
                 },
                 "criticality": {
-                    "description": "Value of the zone",
+                    "description": "Criticality of the zone to be updated",
                     "data_type": "string",
                     "required": true,
                     "value_list": [
                         "Low",
-                        "Medium",
+                        "Normal",
                         "High"
                     ],
                     "order": 3
@@ -1618,7 +1672,6 @@
                 "limit": {
                     "description": "Number of results to fetch",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 0
                 }
             },
@@ -1735,7 +1788,6 @@
                 "limit": {
                     "description": "Number of results to fetch",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 0
                 }
             },

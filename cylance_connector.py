@@ -1,5 +1,5 @@
 # File: cylance_connector.py
-# Copyright (c) 2019 Splunk Inc.
+# Copyright (c) 2018-2021 Splunk Inc.
 #
 # SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
@@ -44,6 +44,10 @@ class CylanceConnector(BaseConnector):
         # modify this as you deem fit.
         self._base_url = None
         self._access_token = None
+        self._region_code = None
+        self._tenant_id = None
+        self._application_id = None
+        self._application_secret = None
 
     def _process_empty_response(self, response, action_result):
 
@@ -163,7 +167,7 @@ class CylanceConnector(BaseConnector):
 
         try:
             # All the zip files are encrypted with the password 'infected'
-            zf.extractall(tmp_dir, pwd='infected')
+            zf.extractall(tmp_dir, pwd='infected'.encode('utf-8'))
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error extracting zip file")
 
@@ -200,27 +204,27 @@ class CylanceConnector(BaseConnector):
         epoch_timeout = int((timeout_datetime - datetime(1970, 1, 1)).total_seconds())
         jti_val = str(uuid.uuid4())
 
-        tid_val = config[CYLANCE_JSON_TENANT_ID]
-        app_id = config[CYLANCE_JSON_APPLICATION_ID]
-        app_secret = config[CYLANCE_JSON_APPLICATION_SECRET]
+        self._tenant_id = config[CYLANCE_JSON_TENANT_ID]
+        self._application_id = config[CYLANCE_JSON_APPLICATION_ID]
+        self._application_secret = config[CYLANCE_JSON_APPLICATION_SECRET]
 
         auth_url = self._base_url + "/auth/v2/token"
         claims = {
             "exp": epoch_timeout,
             "iat": epoch_time,
             "iss": "http://cylance.com",
-            "sub": app_id,
-            "tid": tid_val,
+            "sub": self._application_id,
+            "tid": self._tenant_id,
             "jti": jti_val
         }
 
         try:
-            encoded = jwt.encode(claims, app_secret, algorithm='HS256')
+            encoded = jwt.encode(claims, self._application_secret, algorithm='HS256')
         except:
             return action_result.set_status(phantom.APP_ERROR, CYLANCE_AUTH_TOKEN_ERR)
 
-        payload = { "auth_token": encoded }
-        headers = { "Accept": "application/json", "Content-Type": "application/json" }
+        payload = {"auth_token": encoded}
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
         self.save_progress("Creating access token")
 
@@ -728,18 +732,9 @@ class CylanceConnector(BaseConnector):
 
         self._state = self.load_state()
         config = self.get_config()
-        region_code = config[CYLANCE_JSON_REGION_CODE]
+        self._region_code = config[CYLANCE_JSON_REGION_CODE]
 
-        region_codes = {
-            "Asia-Pacific - North": "-apne1",
-            "Asia-Pacific - Southeast": "-au",
-            "Europe - Central": "-euc1",
-            "Government": ".us",
-            "North America": "",
-            "South America": "-sae1"
-        }
-
-        region_code_formatted = region_codes.get(region_code)
+        region_code_formatted = CYLANCE_REGION_CODES.get(self._region_code)
 
         self._base_url = "https://protectapi{}.cylance.com".format(region_code_formatted)
         self._access_token = self._state.get('_access_token', '')
@@ -780,7 +775,7 @@ if __name__ == '__main__':
 
     if (username and password):
         try:
-            print ("Accessing the Login page")
+            print("Accessing the Login page")
             r = requests.get(BaseConnector._get_phantom_base_url() + "login", verify=False)
             csrftoken = r.cookies['csrftoken']
 
@@ -793,11 +788,11 @@ if __name__ == '__main__':
             headers['Cookie'] = 'csrftoken=' + csrftoken
             headers['Referer'] = BaseConnector._get_phantom_base_url() + 'login'
 
-            print ("Logging into Platform to get the session id")
+            print("Logging into Platform to get the session id")
             r2 = requests.post(BaseConnector._get_phantom_base_url() + "login", verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
-            print ("Unable to get session id from the platfrom. Error: " + str(e))
+            print("Unable to get session id from the platfrom. Error: " + str(e))
             exit(1)
 
     with open(args.input_test_json) as f:
@@ -813,6 +808,6 @@ if __name__ == '__main__':
             connector._set_csrf_info(csrftoken, headers['Referer'])
 
         ret_val = connector._handle_action(json.dumps(in_json), None)
-        print (json.dumps(json.loads(ret_val), indent=4))
+        print(json.dumps(json.loads(ret_val), indent=4))
 
     exit(0)
