@@ -1,4 +1,0 @@
-[submodule "wheel"]
-	path = wheel
-	url = git@cd.splunkdev.com:phantom-external/jwt.git
-	ignore = dirty
