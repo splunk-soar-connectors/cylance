@@ -15,22 +15,23 @@
 #
 #
 # Phantom App imports
+import json
+import os
+import shutil
+import uuid
+from datetime import datetime, timedelta
+from zipfile import ZipFile
+
+import jwt
 import phantom.app as phantom
-from phantom.base_connector import BaseConnector
+import requests
+from bs4 import BeautifulSoup
 from phantom.action_result import ActionResult
+from phantom.base_connector import BaseConnector
 from phantom.vault import Vault as Vault
 
 # Usage of the consts file is recommended
 from cylance_consts import *
-import os
-import shutil
-import jwt
-import uuid
-import requests
-import json
-from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
-from zipfile import ZipFile
 
 
 class RetVal(tuple):
@@ -758,8 +759,9 @@ class CylanceConnector(BaseConnector):
 
 if __name__ == '__main__':
 
-    import pudb
     import argparse
+
+    import pudb
 
     pudb.set_trace()
 
