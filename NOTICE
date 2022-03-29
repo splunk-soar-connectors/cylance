@@ -1,7 +1,12 @@
 Splunk SOAR CylancePROTECT
-Copyright (c) 2018-2021 Splunk Inc.
+Copyright (c) 2018-2022 Splunk Inc.
 
 Third-party Software Attributions:
+
+Library: PyJWT
+Version: 1.6.1
+License: MIT License (MIT)
+Unknown copyright
 
 Library: beautifulsoup4
 Version: 4.9.1
