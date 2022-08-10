@@ -178,7 +178,7 @@ class CylanceConnector(BaseConnector):
         vault_path = "{}/{}".format(tmp_dir, ex_name)
 
         try:
-            # All the zip files are encrypted with the pwd 'infected'
+            # All the zip files are encrypted with the password 'infected'
             zf.extractall(tmp_dir, pwd='infected'.encode('utf-8'))
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error extracting zip file")
@@ -253,6 +253,9 @@ class CylanceConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _make_rest_call_helper(self, endpoint, action_result, headers=None, params=None, json=None, data=None, method="get"):
+
+        if not data:
+            data = json.dumps(json)
 
         url = "{0}{1}".format(self._base_url, endpoint)
 
@@ -532,7 +535,7 @@ class CylanceConnector(BaseConnector):
         sha256_hash = param['hash']
         reason = param['reason']
         list_type = param['list_type']
-        category = param.get('category', '')
+        category = param.get('category', 'None')
 
         request = {
             "sha256": sha256_hash,
