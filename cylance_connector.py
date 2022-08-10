@@ -532,7 +532,7 @@ class CylanceConnector(BaseConnector):
         sha256_hash = param['hash']
         reason = param['reason']
         list_type = param['list_type']
-        category = param.get('category', {})
+        category = param.get('category', '')
 
         request = {
             "sha256": sha256_hash,
