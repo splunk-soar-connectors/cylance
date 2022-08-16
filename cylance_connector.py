@@ -292,17 +292,13 @@ class CylanceConnector(BaseConnector):
         resp_json = None
 
         try:
-            request_func = getattr(requests, method)
-        except AttributeError:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid method: {0}".format(method)), resp_json)
-
-        try:
-            r = request_func(
-                            url,
-                            json=json,
-                            data=data,
-                            headers=headers,
-                            params=params)
+            kwargs = {
+                "json": json,
+                "data": data,
+                "headers": headers,
+                "params": params,
+            }
+            r = requests.request(method, url, **kwargs)
         except Exception as e:
             return RetVal(action_result.set_status( phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))), resp_json)
 
