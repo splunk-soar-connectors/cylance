@@ -2,11 +2,11 @@
 # CylancePROTECT
 
 Publisher: Splunk  
-Connector Version: 2\.0\.4  
+Connector Version: 2\.0\.5  
 Product Vendor: Cylance  
 Product Name: CylancePROTECT  
 Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 5\.1\.0  
+Minimum Product Version: 5\.3\.0  
 
 This app supports the various investigative, containment, and corrective actions on CylancePROTECT
 
