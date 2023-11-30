@@ -2,11 +2,11 @@
 # CylancePROTECT
 
 Publisher: Splunk  
-Connector Version: 2\.0\.5  
+Connector Version: 2.0.6  
 Product Vendor: Cylance  
 Product Name: CylancePROTECT  
-Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 5\.3\.0  
+Product Version Supported (regex): ".\*"  
+Minimum Product Version: 5.3.0  
 
 This app supports the various investigative, containment, and corrective actions on CylancePROTECT
 
@@ -47,10 +47,10 @@ The below configuration variables are required for this Connector to operate.  T
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
-**tenant\_id** |  required  | string | Tenant unique identifier
-**application\_id** |  required  | string | Application unique identifier
-**application\_secret** |  required  | password | Application secret to sign the auth token with
-**region\_code** |  required  | string | Location where your organization's servers belong
+**tenant_id** |  required  | string | Tenant unique identifier
+**application_id** |  required  | string | Application unique identifier
+**application_secret** |  required  | password | Application secret to sign the auth token with
+**region_code** |  required  | string | Location where your organization's servers belong
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using the supplied configuration  
@@ -91,28 +91,28 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **limit** |  optional  | Number of results to fetch | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.data\.\*\.agent\_version | string | 
-action\_result\.data\.\*\.date\_first\_registered | string | 
-action\_result\.data\.\*\.date\_offline | string | 
-action\_result\.data\.\*\.id | string |  `cylance device id` 
-action\_result\.data\.\*\.ip\_addresses | string |  `ip` 
-action\_result\.data\.\*\.mac\_addresses | string | 
-action\_result\.data\.\*\.name | string | 
-action\_result\.data\.\*\.os\_kernel\_version | string | 
-action\_result\.data\.\*\.policy\.id | string |  `cylance policy id` 
-action\_result\.data\.\*\.policy\.name | string | 
-action\_result\.data\.\*\.products\.\*\.name | string | 
-action\_result\.data\.\*\.products\.\*\.status | string | 
-action\_result\.data\.\*\.products\.\*\.version | string | 
-action\_result\.data\.\*\.state | string | 
-action\_result\.summary\.num\_endpoints | numeric | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.limit | numeric |  |   1 
+action_result.data.\*.agent_version | string |  |   2.0.1480 
+action_result.data.\*.date_first_registered | string |  |   2018-04-04T18:28:13 
+action_result.data.\*.date_offline | string |  |  
+action_result.data.\*.id | string |  `cylance device id`  |   7759ff47-3a1b-4b4a-80d9-3fde405faf7b 
+action_result.data.\*.ip_addresses | string |  `ip`  |   10.16.0.34 
+action_result.data.\*.mac_addresses | string |  |   C8-2A-14-54-8A-20 
+action_result.data.\*.name | string |  |   Test user name 
+action_result.data.\*.os_kernel_version | string |  |  
+action_result.data.\*.policy.id | string |  `cylance policy id`  |   73dee1b4-98d2-4728-8ad7-3b374c688c69 
+action_result.data.\*.policy.name | string |  |   Default 
+action_result.data.\*.products.\*.name | string |  |  
+action_result.data.\*.products.\*.status | string |  |  
+action_result.data.\*.products.\*.version | string |  |  
+action_result.data.\*.state | string |  |   Online 
+action_result.summary.num_endpoints | numeric |  |   1 
+action_result.message | string |  |   Num endpoints: 1 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'list threats'
 Get a list of threats on the specific device
@@ -123,27 +123,27 @@ Read only: **True**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**unique\_device\_id** |  required  | ID of the device to fetch threats | string |  `cylance device id` 
+**unique_device_id** |  required  | ID of the device to fetch threats | string |  `cylance device id` 
 **limit** |  optional  | Number of results to fetch | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.parameter\.unique\_device\_id | string |  `cylance device id` 
-action\_result\.data\.\*\.classification | string | 
-action\_result\.data\.\*\.cylance\_score | numeric | 
-action\_result\.data\.\*\.date\_found | string | 
-action\_result\.data\.\*\.file\_path | string |  `file name` 
-action\_result\.data\.\*\.file\_status | string | 
-action\_result\.data\.\*\.name | string |  `file name` 
-action\_result\.data\.\*\.sha256 | string |  `sha256` 
-action\_result\.data\.\*\.sub\_classification | string | 
-action\_result\.summary\.num\_threats | numeric | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.limit | numeric |  |   1 
+action_result.parameter.unique_device_id | string |  `cylance device id`  |   f20c5afa-7614-46d3-bd54-d555e34b140b 
+action_result.data.\*.classification | string |  |   Malware 
+action_result.data.\*.cylance_score | numeric |  |   -1 
+action_result.data.\*.date_found | string |  |   2018-04-06T20:54:14 
+action_result.data.\*.file_path | string |  `file name`  |   /home/2211.rar|2211/update/server.Dat 
+action_result.data.\*.file_status | string |  |   Default 
+action_result.data.\*.name | string |  `file name`  |   2211.rar|2211/update/server.Dat 
+action_result.data.\*.sha256 | string |  `sha256`  |   F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044 
+action_result.data.\*.sub_classification | string |  |   Trojan 
+action_result.summary.num_threats | numeric |  |   3 
+action_result.message | string |  |   Num threats: 3 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'get system info'
 Get information about an endpoint
@@ -154,41 +154,41 @@ Read only: **True**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**unique\_device\_id** |  required  | ID of the device to get info | string |  `cylance device id` 
+**unique_device_id** |  required  | ID of the device to get info | string |  `cylance device id` 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.unique\_device\_id | string |  `cylance device id` 
-action\_result\.data\.\*\.agent\_version | string | 
-action\_result\.data\.\*\.background\_detection | boolean | 
-action\_result\.data\.\*\.date\_first\_registered | string | 
-action\_result\.data\.\*\.date\_last\_modified | string | 
-action\_result\.data\.\*\.date\_offline | string | 
-action\_result\.data\.\*\.distinguished\_name | string | 
-action\_result\.data\.\*\.host\_name | string | 
-action\_result\.data\.\*\.id | string |  `cylance device id` 
-action\_result\.data\.\*\.ip\_addresses | string |  `ip` 
-action\_result\.data\.\*\.is\_safe | boolean | 
-action\_result\.data\.\*\.last\_logged\_in\_user | string | 
-action\_result\.data\.\*\.mac\_addresses | string | 
-action\_result\.data\.\*\.name | string | 
-action\_result\.data\.\*\.os\_kernel\_version | string | 
-action\_result\.data\.\*\.os\_version | string | 
-action\_result\.data\.\*\.policy\.id | string |  `cylance policy id` 
-action\_result\.data\.\*\.policy\.name | string | 
-action\_result\.data\.\*\.products\.\*\.name | string | 
-action\_result\.data\.\*\.products\.\*\.status | string | 
-action\_result\.data\.\*\.products\.\*\.version | string | 
-action\_result\.data\.\*\.state | string | 
-action\_result\.data\.\*\.update\_available | boolean | 
-action\_result\.data\.\*\.update\_type | string | 
-action\_result\.summary\.id | string |  `cylance device id` 
-action\_result\.summary\.is\_safe | boolean | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.unique_device_id | string |  `cylance device id`  |   7759ff47-3a1b-4b4a-80d9-3fde405faf7b 
+action_result.data.\*.agent_version | string |  |   2.0.1480 
+action_result.data.\*.background_detection | boolean |  |   True 
+action_result.data.\*.date_first_registered | string |  |   2018-04-04T18:28:13 
+action_result.data.\*.date_last_modified | string |  |  
+action_result.data.\*.date_offline | string |  |  
+action_result.data.\*.distinguished_name | string |  |  
+action_result.data.\*.host_name | string |  |   Test-user 
+action_result.data.\*.id | string |  `cylance device id`  |   7759ff47-3a1b-4b4a-80d9-3fde405faf7b 
+action_result.data.\*.ip_addresses | string |  `ip`  |   10.16.0.34 
+action_result.data.\*.is_safe | boolean |  |   True 
+action_result.data.\*.last_logged_in_user | string |  |   Test 
+action_result.data.\*.mac_addresses | string |  |   C8-2A-14-54-8A-20 
+action_result.data.\*.name | string |  |   Test user name 
+action_result.data.\*.os_kernel_version | string |  |  
+action_result.data.\*.os_version | string |  |   Mac OS X El Capitan 10.11.6 
+action_result.data.\*.policy.id | string |  `cylance policy id`  |   00000000-0000-0000-0000-000000000000 
+action_result.data.\*.policy.name | string |  |   Default 
+action_result.data.\*.products.\*.name | string |  |  
+action_result.data.\*.products.\*.status | string |  |  
+action_result.data.\*.products.\*.version | string |  |  
+action_result.data.\*.state | string |  |   Online 
+action_result.data.\*.update_available | boolean |  |   True 
+action_result.data.\*.update_type | string |  |  
+action_result.summary.id | string |  `cylance device id`  |   7759ff47-3a1b-4b4a-80d9-3fde405faf7b 
+action_result.summary.is_safe | boolean |  |  
+action_result.message | string |  |   Id: 7759ff47-3a1b-4b4a-80d9-3fde405faf7b 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'hunt file'
 Hunt a file on the network using the hash
@@ -203,25 +203,25 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **limit** |  optional  | Number of results to fetch | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.hash | string |  `sha256` 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.data\.\*\.agent\_version | string | 
-action\_result\.data\.\*\.date\_found | string | 
-action\_result\.data\.\*\.file\_path | string | 
-action\_result\.data\.\*\.file\_status | string | 
-action\_result\.data\.\*\.id | string |  `cylance device id` 
-action\_result\.data\.\*\.ip\_addresses | string |  `ip` 
-action\_result\.data\.\*\.mac\_addresses | string |  `mac address` 
-action\_result\.data\.\*\.name | string | 
-action\_result\.data\.\*\.policy\_id | string |  `cylance policy id` 
-action\_result\.data\.\*\.state | string | 
-action\_result\.summary\.num\_items | numeric | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.hash | string |  `sha256`  |   F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044 
+action_result.parameter.limit | numeric |  |   1 
+action_result.data.\*.agent_version | string |  |   2.0.1480 
+action_result.data.\*.date_found | string |  |   2018-04-06T20:54:14 
+action_result.data.\*.file_path | string |  |   /home/2211.rar|2211/update/server.Dat 
+action_result.data.\*.file_status | string |  |   Default 
+action_result.data.\*.id | string |  `cylance device id`  |   f20c5afa-7614-46d3-bd54-d555e34b140b 
+action_result.data.\*.ip_addresses | string |  `ip`  |   172.16.95.133 
+action_result.data.\*.mac_addresses | string |  `mac address`  |   00-0C-29-48-A0-45 
+action_result.data.\*.name | string |  |   localhost.localdomain 
+action_result.data.\*.policy_id | string |  `cylance policy id`  |   73dee1b4-98d2-4728-8ad7-3b374c688c69 
+action_result.data.\*.state | string |  |   OnLine 
+action_result.summary.num_items | numeric |  |   1 
+action_result.message | string |  |   Num items: 1 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'get global list'
 Retrieve the hashes for the given type of list
@@ -232,31 +232,31 @@ Read only: **True**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**list\_type\_id** |  required  | List type of which the threat belongs to | string | 
+**list_type_id** |  required  | List type of which the threat belongs to | string | 
 **limit** |  optional  | Number of results to fetch | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.parameter\.list\_type\_id | string | 
-action\_result\.data\.\*\.added | string | 
-action\_result\.data\.\*\.added\_by | string | 
-action\_result\.data\.\*\.av\_industry | string | 
-action\_result\.data\.\*\.category | string | 
-action\_result\.data\.\*\.classification | string | 
-action\_result\.data\.\*\.cylance\_score | numeric | 
-action\_result\.data\.\*\.list\_type | string | 
-action\_result\.data\.\*\.md5 | string |  `md5` 
-action\_result\.data\.\*\.name | string |  `file name` 
-action\_result\.data\.\*\.reason | string | 
-action\_result\.data\.\*\.sha256 | string |  `sha256` 
-action\_result\.data\.\*\.sub\_classification | string | 
-action\_result\.summary\.num\_items | numeric | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.limit | numeric |  |   1 
+action_result.parameter.list_type_id | string |  |   GlobalQuarantine 
+action_result.data.\*.added | string |  |   2018-04-11T04:05:18 
+action_result.data.\*.added_by | string |  |   85015301-d17e-4b77-b459-707ff310cab2 
+action_result.data.\*.av_industry | string |  |  
+action_result.data.\*.category | string |  |  
+action_result.data.\*.classification | string |  |   Malware 
+action_result.data.\*.cylance_score | numeric |  |   -0.999 
+action_result.data.\*.list_type | string |  |   GlobalQuarantine 
+action_result.data.\*.md5 | string |  `md5`  |   00BFEFEEEAC3CE8CA86F04B712FF5F05 
+action_result.data.\*.name | string |  `file name`  |   711.rar|711/670d52a15668(Server).exe 
+action_result.data.\*.reason | string |  |   Suspicious file 
+action_result.data.\*.sha256 | string |  `sha256`  |   CC0CA86E194D2849C2B6C273C46A6A5D2B4846A72DE50033E8638724CAE07786 
+action_result.data.\*.sub_classification | string |  |   Trojan 
+action_result.summary.num_items | numeric |  |   2 
+action_result.message | string |  |   Num items: 2 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'unblock hash'
 Unblock a file hash
@@ -268,19 +268,19 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **hash** |  required  | SHA256 hash for the threat | string |  `sha256` 
-**list\_type** |  required  | List type to which the threat belongs | string | 
+**list_type** |  required  | List type to which the threat belongs | string | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.hash | string |  `sha256` 
-action\_result\.parameter\.list\_type | string | 
-action\_result\.data | string | 
-action\_result\.summary | string | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.hash | string |  `sha256`  |   F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044 
+action_result.parameter.list_type | string |  |   GlobalQuarantine 
+action_result.data | string |  |  
+action_result.summary | string |  |  
+action_result.message | string |  |   Successfully unblocked hash 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'block hash'
 Block a file hash
@@ -288,29 +288,29 @@ Block a file hash
 Type: **contain**  
 Read only: **False**
 
-Action parameter 'category' is required only if the list\_type value is GlobalSafe\.
+Action parameter 'category' is required only if the list_type value is GlobalSafe.
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **hash** |  required  | SHA256 hash for the threat | string |  `sha256` 
 **reason** |  required  | Reason why the file was added to the list | string | 
-**list\_type** |  required  | List type to which the threat belongs | string | 
+**list_type** |  required  | List type to which the threat belongs | string | 
 **category** |  optional  | Category for GlobalSafe list type | string | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.category | string | 
-action\_result\.parameter\.hash | string |  `sha256` 
-action\_result\.parameter\.list\_type | string | 
-action\_result\.parameter\.reason | string | 
-action\_result\.data | string | 
-action\_result\.summary | string | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.category | string |  |   None 
+action_result.parameter.hash | string |  `sha256`  |   F5DCF6111E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044 
+action_result.parameter.list_type | string |  |   GlobalQuarantine 
+action_result.parameter.reason | string |  |   This is malware 
+action_result.data | string |  |  
+action_result.summary | string |  |  
+action_result.message | string |  |   Successfully blocked hash 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'get file'
 Download a file to the vault
@@ -324,17 +324,17 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **hash** |  required  | SHA256 hash of file to download | string |  `sha256` 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.hash | string |  `sha256` 
-action\_result\.data | string | 
-action\_result\.summary\.name | string |  `sha256` 
-action\_result\.summary\.size | numeric | 
-action\_result\.summary\.vault\_id | string |  `sha1`  `vault id` 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.hash | string |  `sha256`  |   EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111 
+action_result.data | string |  |  
+action_result.summary.name | string |  `sha256`  |   EFD5A16B2AA99F36C7E457454011E7CA8DE232F4584BA5957880A7B2368ED111 
+action_result.summary.size | numeric |  |   2113536 
+action_result.summary.vault_id | string |  `sha1`  `vault id`  |   dcf38e99bd2a70a1ea7232ab5e04aca63e535795 
+action_result.message | string |  |   Successfully added file to vault 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'get file info'
 Get information about a file
@@ -348,32 +348,32 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **hash** |  required  | SHA256 hash of file | string |  `sha256` 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.hash | string |  `sha256` 
-action\_result\.data\.\*\.auto\_run | boolean | 
-action\_result\.data\.\*\.av\_industry | string | 
-action\_result\.data\.\*\.cert\_issuer | string | 
-action\_result\.data\.\*\.cert\_publisher | string | 
-action\_result\.data\.\*\.cert\_timestamp | string | 
-action\_result\.data\.\*\.classification | string | 
-action\_result\.data\.\*\.cylance\_score | numeric | 
-action\_result\.data\.\*\.detected\_by | string | 
-action\_result\.data\.\*\.file\_size | numeric | 
-action\_result\.data\.\*\.global\_quarantined | boolean | 
-action\_result\.data\.\*\.md5 | string |  `md5` 
-action\_result\.data\.\*\.name | string | 
-action\_result\.data\.\*\.running | boolean | 
-action\_result\.data\.\*\.safelisted | boolean | 
-action\_result\.data\.\*\.sha256 | string |  `sha256` 
-action\_result\.data\.\*\.signed | boolean | 
-action\_result\.data\.\*\.sub\_classification | string | 
-action\_result\.data\.\*\.unique\_to\_cylance | boolean | 
-action\_result\.summary\.classification | string | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.hash | string |  `sha256`  |   F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044 
+action_result.data.\*.auto_run | boolean |  |   True  False 
+action_result.data.\*.av_industry | string |  |  
+action_result.data.\*.cert_issuer | string |  |  
+action_result.data.\*.cert_publisher | string |  |  
+action_result.data.\*.cert_timestamp | string |  |   0001-01-01T00:00:00 
+action_result.data.\*.classification | string |  |   Malware 
+action_result.data.\*.cylance_score | numeric |  |   -1 
+action_result.data.\*.detected_by | string |  |   File Watcher 
+action_result.data.\*.file_size | numeric |  |   135301 
+action_result.data.\*.global_quarantined | boolean |  |   True 
+action_result.data.\*.md5 | string |  `md5`  |   9ECA5D103CD63622B620A93B40C93A78 
+action_result.data.\*.name | string |  |   2211.rar|2211/update/server.Dat 
+action_result.data.\*.running | boolean |  |   True 
+action_result.data.\*.safelisted | boolean |  |   True 
+action_result.data.\*.sha256 | string |  `sha256`  |   F5DCF6100E1CA85CFF034E7A45EEC468921E3D11463475B7F6AE06F39A17F044 
+action_result.data.\*.signed | boolean |  |   True  False 
+action_result.data.\*.sub_classification | string |  |   Trojan 
+action_result.data.\*.unique_to_cylance | boolean |  |   True  False 
+action_result.summary.classification | string |  |   Malware 
+action_result.message | string |  |   Classification: Malware 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'update zone'
 Update the details of a zone
@@ -384,24 +384,24 @@ Read only: **False**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**unique\_zone\_id** |  required  | Zone ID to update info of | string |  `cylance zone id` 
+**unique_zone_id** |  required  | Zone ID to update info of | string |  `cylance zone id` 
 **name** |  required  | Name of the zone to be updated | string |  `cylance zone name` 
-**policy\_id** |  required  | Unique ID of the policy to be assigned to the zone | string |  `cylance policy id` 
+**policy_id** |  required  | Unique ID of the policy to be assigned to the zone | string |  `cylance policy id` 
 **criticality** |  required  | Criticality of the zone to be updated | string | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.criticality | string | 
-action\_result\.parameter\.name | string |  `cylance zone name` 
-action\_result\.parameter\.policy\_id | string |  `cylance policy id` 
-action\_result\.parameter\.unique\_zone\_id | string |  `cylance zone id` 
-action\_result\.data | string | 
-action\_result\.summary | string | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.criticality | string |  |   Low 
+action_result.parameter.name | string |  `cylance zone name`  |   test-zone 
+action_result.parameter.policy_id | string |  `cylance policy id`  |   73dee1b4-98d2-4728-8ad7-3b374c688c69 
+action_result.parameter.unique_zone_id | string |  `cylance zone id`  |   61bf0771-5082-41fd-a63d-8157b104073b 
+action_result.data | string |  |  
+action_result.summary | string |  |  
+action_result.message | string |  |   Successfully updated zone 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'list policies'
 Get a list of tenant policies
@@ -415,20 +415,20 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **limit** |  optional  | Number of results to fetch | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.data\.\*\.date\_added | string | 
-action\_result\.data\.\*\.date\_modified | string | 
-action\_result\.data\.\*\.device\_count | numeric | 
-action\_result\.data\.\*\.id | string |  `cylance policy id` 
-action\_result\.data\.\*\.name | string | 
-action\_result\.data\.\*\.zone\_count | numeric | 
-action\_result\.summary\.num\_policies | numeric | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.limit | numeric |  |   1 
+action_result.data.\*.date_added | string |  |   2018-04-11T04:43:56.967 
+action_result.data.\*.date_modified | string |  |   2018-04-11T04:43:56.967 
+action_result.data.\*.device_count | numeric |  |   0 
+action_result.data.\*.id | string |  `cylance policy id`  |   9eff3f0c-069d-43c1-8dae-7ee9b7cdbc7d 
+action_result.data.\*.name | string |  |   admin's policy 
+action_result.data.\*.zone_count | numeric |  |   0 
+action_result.summary.num_policies | numeric |  |   2 
+action_result.message | string |  |   Num policies: 2 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'list zones'
 Get a list of tenant zones
@@ -442,19 +442,19 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **limit** |  optional  | Number of results to fetch | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.data\.\*\.criticality | string | 
-action\_result\.data\.\*\.date\_created | string | 
-action\_result\.data\.\*\.date\_modified | string | 
-action\_result\.data\.\*\.id | string |  `cylance zone id` 
-action\_result\.data\.\*\.name | string |  `cylance zone name` 
-action\_result\.data\.\*\.policy\_id | string |  `cylance policy id` 
-action\_result\.data\.\*\.update\_type | string | 
-action\_result\.data\.\*\.zone\_rule\_id | string | 
-action\_result\.summary\.num\_zones | numeric | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric | 
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.limit | numeric |  |   1 
+action_result.data.\*.criticality | string |  |   Normal 
+action_result.data.\*.date_created | string |  |   2018-04-06T20:40:25 
+action_result.data.\*.date_modified | string |  |   2018-04-06T20:40:25 
+action_result.data.\*.id | string |  `cylance zone id`  |   d7561d6b-3eff-459b-bde2-3a6eec15b228 
+action_result.data.\*.name | string |  `cylance zone name`  |   test-zone 
+action_result.data.\*.policy_id | string |  `cylance policy id`  |   73dee1b4-98d2-4728-8ad7-3b374c688c69 
+action_result.data.\*.update_type | string |  |   Production 
+action_result.data.\*.zone_rule_id | string |  |  
+action_result.summary.num_zones | numeric |  |   3 
+action_result.message | string |  |   Num zones: 3 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1 
