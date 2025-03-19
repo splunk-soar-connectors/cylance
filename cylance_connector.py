@@ -1,6 +1,6 @@
 # File: cylance_connector.py
 #
-# Copyright (c) 2018-2023 Splunk Inc.
+# Copyright (c) 2018-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ from phantom.vault import Vault as Vault
 # Usage of the consts file is recommended
 from cylance_consts import *
 
+
 DEFAULT_REQUEST_TIMEOUT = 30  # in seconds
 
 
@@ -43,11 +44,9 @@ class RetVal(tuple):
 
 
 class CylanceConnector(BaseConnector):
-
     def __init__(self):
-
         # Call the BaseConnectors init first
-        super(CylanceConnector, self).__init__()
+        super().__init__()
 
         self._state = None
 
@@ -62,11 +61,10 @@ class CylanceConnector(BaseConnector):
         self._application_secret = None
 
     def _process_empty_response(self, response, action_result):
-
         if response.status_code == 200:
             return RetVal(phantom.APP_SUCCESS, {})
 
-        message = "Status code: {}. Empty response and no information in the header".format(response.status_code)
+        message = f"Status code: {response.status_code}. Empty response and no information in the header"
 
         if response.status_code == 404:
             message = "{}. {}".format(message, "Please verify the provided input parameters")
@@ -76,63 +74,58 @@ class CylanceConnector(BaseConnector):
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
     def _process_html_response(self, response, action_result):
-
         # An html response, treat it like an error
         status_code = response.status_code
 
         try:
             soup = BeautifulSoup(response.text, "html.parser")
             error_text = soup.text
-            split_lines = error_text.split('\n')
+            split_lines = error_text.split("\n")
             split_lines = [x.strip() for x in split_lines if x.strip()]
-            error_text = '\n'.join(split_lines)
+            error_text = "\n".join(split_lines)
         except:
             error_text = "Cannot parse error details"
 
-        message = "Status Code: {0}. Data from server:\n{1}\n".format(status_code,
-                error_text)
+        message = f"Status Code: {status_code}. Data from server:\n{error_text}\n"
 
-        message = message.replace('{', '{{').replace('}', '}}')
+        message = message.replace("{", "{{").replace("}", "}}")
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
     def _process_json_response(self, r, action_result):
-
         # Try a json parse
         try:
             resp_json = r.json()
         except Exception as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Unable to parse JSON response. Error: {0}".format(str(e))), None)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, f"Unable to parse JSON response. Error: {e!s}"), None)
 
         # Please specify the status codes here
         if 200 <= r.status_code < 399:
             return RetVal(phantom.APP_SUCCESS, resp_json)
 
         # You should process the error returned in the json
-        message = "Error from server. Status Code: {0} Data from server: {1}".format(
-                r.status_code, r.text.replace('{', '{{').replace('}', '}}'))
+        message = "Error from server. Status Code: {} Data from server: {}".format(r.status_code, r.text.replace("{", "{{").replace("}", "}}"))
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
     def _process_response(self, r, action_result):
-
         # store the r_text in debug data, it will get dumped in the logs if the action fails
-        if hasattr(action_result, 'add_debug_data'):
-            action_result.add_debug_data({'r_status_code': r.status_code})
-            action_result.add_debug_data({'r_text': r.text})
-            action_result.add_debug_data({'r_headers': r.headers})
+        if hasattr(action_result, "add_debug_data"):
+            action_result.add_debug_data({"r_status_code": r.status_code})
+            action_result.add_debug_data({"r_text": r.text})
+            action_result.add_debug_data({"r_headers": r.headers})
 
         # Process each 'Content-Type' of response separately
 
         # Process a json response
-        if 'json' in r.headers.get('Content-Type', ''):
+        if "json" in r.headers.get("Content-Type", ""):
             return self._process_json_response(r, action_result)
 
         # Process an HTML response, Do this no matter what the api talks.
         # There is a high chance of a PROXY in between phantom and the rest of
         # world, in case of errors, PROXY's return HTML, this function parses
         # the error and adds it to the action_result.
-        if 'html' in r.headers.get('Content-Type', ''):
+        if "html" in r.headers.get("Content-Type", ""):
             return self._process_html_response(r, action_result)
 
         # it's not content-type that is to be parsed, handle an empty response
@@ -140,28 +133,29 @@ class CylanceConnector(BaseConnector):
             return self._process_empty_response(r, action_result)
 
         # everything else is actually an error at this point
-        message = "Can't process response from server. Status Code: {0} Data from server: {1}".format(
-                r.status_code, r.text.replace('{', '{{').replace('}', '}}'))
+        message = "Can't process response from server. Status Code: {} Data from server: {}".format(
+            r.status_code, r.text.replace("{", "{{").replace("}", "}}")
+        )
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
     def _download_file_to_vault(self, action_result, url, file_name):
-        """ Download a file and add it to the vault """
+        """Download a file and add it to the vault"""
 
         guid = uuid.uuid4()
 
-        if hasattr(Vault, 'get_vault_tmp_dir'):
+        if hasattr(Vault, "get_vault_tmp_dir"):
             local_dir = Vault.get_vault_tmp_dir()
         else:
-            local_dir = '/opt/phantom/vault/tmp'
+            local_dir = "/opt/phantom/vault/tmp"
 
-        tmp_dir = local_dir + "/{}".format(guid)
-        zip_path = "{}/{}".format(tmp_dir, file_name)
+        tmp_dir = local_dir + f"/{guid}"
+        zip_path = f"{tmp_dir}/{file_name}"
 
         try:
             os.makedirs(tmp_dir)
         except Exception as e:
-            msg = "Unable to create temporary folder '{}': ".format(tmp_dir)
+            msg = f"Unable to create temporary folder '{tmp_dir}': "
             return action_result.set_status(phantom.APP_ERROR, msg, e)
 
         try:
@@ -169,27 +163,28 @@ class CylanceConnector(BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error downloading file")
 
-        with open(zip_path, 'wb') as f:
+        with open(zip_path, "wb") as f:
             f.write(r.content)
             f.close()
 
         zf = ZipFile(zip_path)
         ex_name = zf.namelist()[0]
-        vault_path = "{}/{}".format(tmp_dir, ex_name)
+        vault_path = f"{tmp_dir}/{ex_name}"
 
         try:
             # All the zip files are encrypted with the password 'infected'
-            zf.extractall(tmp_dir, pwd='infected'.encode('utf-8'))
+            zf.extractall(tmp_dir, pwd=b"infected")
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error extracting zip file")
 
         vault_ret = Vault.add_attachment(vault_path, self.get_container_id(), file_name=ex_name)
-        if vault_ret.get('succeeded'):
+        if vault_ret.get("succeeded"):
             action_result.set_status(phantom.APP_SUCCESS, "Transferred file")
             summary = {
-                    phantom.APP_JSON_VAULT_ID: vault_ret[phantom.APP_JSON_HASH],
-                    phantom.APP_JSON_NAME: ex_name,
-                    phantom.APP_JSON_SIZE: vault_ret.get(phantom.APP_JSON_SIZE)}
+                phantom.APP_JSON_VAULT_ID: vault_ret[phantom.APP_JSON_HASH],
+                phantom.APP_JSON_NAME: ex_name,
+                phantom.APP_JSON_SIZE: vault_ret.get(phantom.APP_JSON_SIZE),
+            }
             action_result.update_summary(summary)
             action_result.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
         else:
@@ -227,11 +222,11 @@ class CylanceConnector(BaseConnector):
             "iss": "http://cylance.com",
             "sub": self._application_id,
             "tid": self._tenant_id,
-            "jti": jti_val
+            "jti": jti_val,
         }
 
         try:
-            encoded = jwt.encode(claims, self._application_secret, algorithm='HS256')
+            encoded = jwt.encode(claims, self._application_secret, algorithm="HS256")
         except:
             return action_result.set_status(phantom.APP_ERROR, CYLANCE_AUTH_TOKEN_ERR)
 
@@ -242,30 +237,25 @@ class CylanceConnector(BaseConnector):
 
         try:
             resp = requests.post(auth_url, headers=headers, json=payload, timeout=DEFAULT_REQUEST_TIMEOUT)
-            access_token = json.loads(resp.text)['access_token']
+            access_token = json.loads(resp.text)["access_token"]
         except:
             return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
-        self._state['_access_token'] = access_token
+        self._state["_access_token"] = access_token
         self._access_token = access_token
         self.save_state(self._state)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _make_rest_call_helper(self, endpoint, action_result, headers=None, params=None, json=None, data=None, method="get"):
-
-        url = "{0}{1}".format(self._base_url, endpoint)
+        url = f"{self._base_url}{endpoint}"
 
         if not self._access_token:
             ret_val = self._get_access_token(action_result)
             if phantom.is_fail(ret_val):
                 return action_result.get_status(), None
 
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(self._access_token)
-        }
+        headers = {"Accept": "application/json", "Content-Type": "application/json", "Authorization": f"Bearer {self._access_token}"}
 
         ret_val, resp_json = self._make_rest_call(url, action_result, headers=headers, params=params, data=data, json=json, method=method)
 
@@ -278,7 +268,7 @@ class CylanceConnector(BaseConnector):
             if phantom.is_fail(ret_val):
                 return action_result.get_status(), None
 
-            headers.update({"Authorization": "Bearer {}".format(self._access_token)})
+            headers.update({"Authorization": f"Bearer {self._access_token}"})
 
             ret_val, resp_json = self._make_rest_call(url, action_result, headers=headers, params=params, data=data, json=json, method=method)
 
@@ -288,7 +278,6 @@ class CylanceConnector(BaseConnector):
         return phantom.APP_SUCCESS, resp_json
 
     def _make_rest_call(self, url, action_result, headers=None, params=None, json=None, data=None, method="get"):
-
         resp_json = None
 
         try:
@@ -300,12 +289,11 @@ class CylanceConnector(BaseConnector):
             }
             r = requests.request(method, url, **kwargs)
         except Exception as e:
-            return RetVal(action_result.set_status( phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))), resp_json)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, f"Error Connecting to server. Details: {e!s}"), resp_json)
 
         return self._process_response(r, action_result)
 
     def _handle_test_connectivity(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         self.save_progress("Connecting to the server")
@@ -315,9 +303,9 @@ class CylanceConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/users/v2', action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper("/users/v2", action_result, params=None, headers=None)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             self.save_progress("Test Connectivity Failed")
             return action_result.get_status()
 
@@ -326,7 +314,6 @@ class CylanceConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _paginator(self, endpoint, action_result, params=None, limit=None):
-
         items_list = list()
 
         page = 0
@@ -339,8 +326,8 @@ class CylanceConnector(BaseConnector):
             if not params:
                 params = dict()
             page = page + 1
-            params['page'] = page
-            params['page_size'] = DEFAULT_MAX_RESULTS
+            params["page"] = page
+            params["page_size"] = DEFAULT_MAX_RESULTS
 
             ret_val, response = self._make_rest_call_helper(endpoint, action_result, params=params, headers=None)
 
@@ -358,15 +345,14 @@ class CylanceConnector(BaseConnector):
         return items_list
 
     def _handle_list_endpoints(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        limit = param.get('limit')
+        limit = param.get("limit")
 
-        url = '/devices/v2'
+        url = "/devices/v2"
 
         # make rest call
         endpoints = self._paginator(url, action_result, limit=limit)
@@ -379,20 +365,19 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_endpoints'] = len(endpoints)
+        summary["num_endpoints"] = len(endpoints)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_get_threats(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        unique_device_id = param['unique_device_id']
-        limit = param.get('limit')
+        unique_device_id = param["unique_device_id"]
+        limit = param.get("limit")
 
-        url = '/devices/v2/{}/threats'.format(unique_device_id)
+        url = f"/devices/v2/{unique_device_id}/threats"
 
         # make rest call
         threats = self._paginator(url, action_result, limit=limit)
@@ -405,23 +390,22 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_threats'] = len(threats)
+        summary["num_threats"] = len(threats)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_get_system_info(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Required values can be accessed directly
-        unique_device_id = param['unique_device_id']
+        unique_device_id = param["unique_device_id"]
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/devices/v2/{}'.format(unique_device_id), action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper(f"/devices/v2/{unique_device_id}", action_result, params=None, headers=None)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -429,20 +413,19 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['is_safe'] = response['is_safe']
+        summary["is_safe"] = response["is_safe"]
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_hunt_file(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['hash']
-        limit = param.get('limit')
+        sha256_hash = param["hash"]
+        limit = param.get("limit")
 
-        url = '/threats/v2/{}/devices'.format(sha256_hash)
+        url = f"/threats/v2/{sha256_hash}/devices"
 
         # make rest call
         items = self._paginator(url, action_result, limit=limit)
@@ -455,27 +438,26 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_items'] = len(items)
+        summary["num_items"] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_get_global_list(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        list_type_id = param.get('list_type_id')
-        limit = param.get('limit')
+        list_type_id = param.get("list_type_id")
+        limit = param.get("limit")
 
         params = dict()
 
-        if list_type_id == 'GlobalQuarantine':
-            params['listTypeId'] = 0
-        elif list_type_id == 'GlobalSafe':
-            params['listTypeId'] = 1
+        if list_type_id == "GlobalQuarantine":
+            params["listTypeId"] = 0
+        elif list_type_id == "GlobalSafe":
+            params["listTypeId"] = 1
 
-        url = '/globallists/v2'
+        url = "/globallists/v2"
 
         # make rest call
         items = self._paginator(url, action_result, params=params, limit=limit)
@@ -488,28 +470,24 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_items'] = len(items)
+        summary["num_items"] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_unblock_hash(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['hash']
-        list_type = param['list_type']
+        sha256_hash = param["hash"]
+        list_type = param["list_type"]
 
-        request = {
-            "sha256": sha256_hash,
-            "list_type": list_type
-        }
+        request = {"sha256": sha256_hash, "list_type": list_type}
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/globallists/v2', action_result, params=None, json=request, method='delete')
+        ret_val, response = self._make_rest_call_helper("/globallists/v2", action_result, params=None, json=request, method="delete")
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             message = action_result.get_message()
             if "There's no entry for this threat" in message:
                 return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_UNBLOCK_HASH_ALREADY_UNBLOCKED_SUCC)
@@ -520,27 +498,21 @@ class CylanceConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_UNBLOCK_HASH_SUCC)
 
     def _handle_block_hash(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['hash']
-        reason = param['reason']
-        list_type = param['list_type']
-        category = param.get('category', 'None')
+        sha256_hash = param["hash"]
+        reason = param["reason"]
+        list_type = param["list_type"]
+        category = param.get("category", "None")
 
-        request = {
-            "sha256": sha256_hash,
-            "list_type": list_type,
-            "category": category,
-            "reason": reason
-        }
+        request = {"sha256": sha256_hash, "list_type": list_type, "category": category, "reason": reason}
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/globallists/v2', action_result, json=request, method='post')
+        ret_val, response = self._make_rest_call_helper("/globallists/v2", action_result, json=request, method="post")
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             message = action_result.get_message()
             if "There's already an entry for this threat" in message:
                 return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_BLOCK_HASH_ALREADY_BLOCKED_SUCC)
@@ -551,46 +523,45 @@ class CylanceConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_BLOCK_HASH_SUCC)
 
     def _handle_get_file(self, param):
-        """ Get a file and download it to the vault. Cylance will give the URL """
+        """Get a file and download it to the vault. Cylance will give the URL"""
 
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        sha256_hash = param['hash']
+        sha256_hash = param["hash"]
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/threats/v2/download/{}'.format(sha256_hash), action_result, headers=None)
+        ret_val, response = self._make_rest_call_helper(f"/threats/v2/download/{sha256_hash}", action_result, headers=None)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        url = response['url']
-        file_name = '{}.zip'.format(sha256_hash)
+        url = response["url"]
+        file_name = f"{sha256_hash}.zip"
 
         ret_val = self._download_file_to_vault(action_result, url, file_name)
 
         if phantom.is_fail(ret_val):
             msg = action_result.get_message()
-            action_result.set_status(phantom.APP_ERROR, "Failed to add file to vault: {}".format(msg))
+            action_result.set_status(phantom.APP_ERROR, f"Failed to add file to vault: {msg}")
             return self.set_status(phantom.APP_ERROR)
 
         return self.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
 
     def _handle_get_file_info(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Required values can be accessed directly
-        sha256_hash = param['hash']
+        sha256_hash = param["hash"]
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/threats/v2/{}'.format(sha256_hash), action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper(f"/threats/v2/{sha256_hash}", action_result, params=None, headers=None)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -598,21 +569,20 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['classification'] = response['classification']
+        summary["classification"] = response["classification"]
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_get_zones(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        limit = param.get('limit')
+        limit = param.get("limit")
 
-        url = '/zones/v2'
+        url = "/zones/v2"
 
         # make rest call
         items = self._paginator(url, action_result, limit=limit)
@@ -625,33 +595,28 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_zones'] = len(items)
+        summary["num_zones"] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_update_zone(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Required values can be accessed directly
-        unique_zone_id = param['unique_zone_id']
-        name = param['name']
-        policy_id = param['policy_id']
-        criticality = param['criticality']
+        unique_zone_id = param["unique_zone_id"]
+        name = param["name"]
+        policy_id = param["policy_id"]
+        criticality = param["criticality"]
 
-        request = {
-            "name": name,
-            "policy_id": policy_id,
-            "criticality": criticality
-        }
+        request = {"name": name, "policy_id": policy_id, "criticality": criticality}
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper('/zones/v2/{}'.format(unique_zone_id), action_result, json=request, method='put')
+        ret_val, response = self._make_rest_call_helper(f"/zones/v2/{unique_zone_id}", action_result, json=request, method="put")
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Add the response into the data section
@@ -660,16 +625,15 @@ class CylanceConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_UPDATE_ZONE_SUCC)
 
     def _handle_get_policies(self, param):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Optional values should use the .get() function
-        limit = param.get('limit')
+        limit = param.get("limit")
 
-        url = '/policies/v2'
+        url = "/policies/v2"
 
         # make rest call
         items = self._paginator(url, action_result, limit=limit)
@@ -682,12 +646,11 @@ class CylanceConnector(BaseConnector):
 
         # Add a dictionary that is made up of the most important values from data into the summary
         summary = action_result.update_summary({})
-        summary['num_policies'] = len(items)
+        summary["num_policies"] = len(items)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def handle_action(self, param):
-
         ret_val = phantom.APP_SUCCESS
 
         # Get the action that we are supposed to execute for this App Run
@@ -695,69 +658,66 @@ class CylanceConnector(BaseConnector):
 
         self.debug_print("action_id", self.get_action_identifier())
 
-        if action_id == 'test_connectivity':
+        if action_id == "test_connectivity":
             ret_val = self._handle_test_connectivity(param)
 
-        elif action_id == 'list_endpoints':
+        elif action_id == "list_endpoints":
             ret_val = self._handle_list_endpoints(param)
 
-        elif action_id == 'get_threats':
+        elif action_id == "get_threats":
             ret_val = self._handle_get_threats(param)
 
-        elif action_id == 'get_system_info':
+        elif action_id == "get_system_info":
             ret_val = self._handle_get_system_info(param)
 
-        elif action_id == 'hunt_file':
+        elif action_id == "hunt_file":
             ret_val = self._handle_hunt_file(param)
 
-        elif action_id == 'get_global_list':
+        elif action_id == "get_global_list":
             ret_val = self._handle_get_global_list(param)
 
-        elif action_id == 'unblock_hash':
+        elif action_id == "unblock_hash":
             ret_val = self._handle_unblock_hash(param)
 
-        elif action_id == 'block_hash':
+        elif action_id == "block_hash":
             ret_val = self._handle_block_hash(param)
 
-        elif action_id == 'get_file':
+        elif action_id == "get_file":
             ret_val = self._handle_get_file(param)
 
-        elif action_id == 'get_file_info':
+        elif action_id == "get_file_info":
             ret_val = self._handle_get_file_info(param)
 
-        elif action_id == 'get_zones':
+        elif action_id == "get_zones":
             ret_val = self._handle_get_zones(param)
 
-        elif action_id == 'update_zone':
+        elif action_id == "update_zone":
             ret_val = self._handle_update_zone(param)
 
-        elif action_id == 'get_policies':
+        elif action_id == "get_policies":
             ret_val = self._handle_get_policies(param)
 
         return ret_val
 
     def initialize(self):
-
         self._state = self.load_state()
         config = self.get_config()
         self._region_code = config[CYLANCE_JSON_REGION_CODE]
 
         region_code_formatted = CYLANCE_REGION_CODES.get(self._region_code)
 
-        self._base_url = "https://protectapi{}.cylance.com".format(region_code_formatted)
-        self._access_token = self._state.get('_access_token', '')
+        self._base_url = f"https://protectapi{region_code_formatted}.cylance.com"
+        self._access_token = self._state.get("_access_token", "")
 
         return phantom.APP_SUCCESS
 
     def finalize(self):
-
         # Save the state, this data is saved accross actions and app upgrades
         self.save_state(self._state)
         return phantom.APP_SUCCESS
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import argparse
 
     import pudb
@@ -766,10 +726,10 @@ if __name__ == '__main__':
 
     argparser = argparse.ArgumentParser()
 
-    argparser.add_argument('input_test_json', help='Input Test JSON file')
-    argparser.add_argument('-u', '--username', help='username', required=False)
-    argparser.add_argument('-p', '--password', help='password', required=False)
-    argparser.add_argument('-v', '--verify', action='store_true', help='verify', required=False, default=False)
+    argparser.add_argument("input_test_json", help="Input Test JSON file")
+    argparser.add_argument("-u", "--username", help="username", required=False)
+    argparser.add_argument("-p", "--password", help="password", required=False)
+    argparser.add_argument("-v", "--verify", action="store_true", help="verify", required=False, default=False)
 
     args = argparser.parse_args()
     session_id = None
@@ -778,31 +738,32 @@ if __name__ == '__main__':
     password = args.password
     verify = args.verify
 
-    if (username is not None and password is None):
-
+    if username is not None and password is None:
         # User specified a username but not a password, so ask
         import getpass
+
         password = getpass.getpass("Password: ")
 
-    if (username and password):
+    if username and password:
         try:
             print("Accessing the Login page")
             r = requests.get(BaseConnector._get_phantom_base_url() + "login", verify=verify, timeout=DEFAULT_REQUEST_TIMEOUT)
-            csrftoken = r.cookies['csrftoken']
+            csrftoken = r.cookies["csrftoken"]
 
             data = dict()
-            data['username'] = username
-            data['password'] = password
-            data['csrfmiddlewaretoken'] = csrftoken
+            data["username"] = username
+            data["password"] = password
+            data["csrfmiddlewaretoken"] = csrftoken
 
             headers = dict()
-            headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = BaseConnector._get_phantom_base_url() + 'login'
+            headers["Cookie"] = "csrftoken=" + csrftoken
+            headers["Referer"] = BaseConnector._get_phantom_base_url() + "login"
 
             print("Logging into Platform to get the session id")
-            r2 = requests.post(BaseConnector._get_phantom_base_url() + "login", verify=verify, data=data, headers=headers,
-                               timeout=DEFAULT_REQUEST_TIMEOUT)
-            session_id = r2.cookies['sessionid']
+            r2 = requests.post(
+                BaseConnector._get_phantom_base_url() + "login", verify=verify, data=data, headers=headers, timeout=DEFAULT_REQUEST_TIMEOUT
+            )
+            session_id = r2.cookies["sessionid"]
         except Exception as e:
             print("Unable to get session id from the platfrom. Error: " + str(e))
             sys.exit(1)
@@ -815,9 +776,9 @@ if __name__ == '__main__':
         connector = CylanceConnector()
         connector.print_progress_message = True
 
-        if (session_id is not None):
-            in_json['user_session_token'] = session_id
-            connector._set_csrf_info(csrftoken, headers['Referer'])
+        if session_id is not None:
+            in_json["user_session_token"] = session_id
+            connector._set_csrf_info(csrftoken, headers["Referer"])
 
         ret_val = connector._handle_action(json.dumps(in_json), None)
         print(json.dumps(json.loads(ret_val), indent=4))

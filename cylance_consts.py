@@ -1,6 +1,6 @@
 # File: cylance_consts.py
 #
-# Copyright (c) 2018-2023 Splunk Inc.
+# Copyright (c) 2018-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 CYLANCE_JSON_USERNAME = "username"
-CYLANCE_JSON_PASSWORD = "password"
+CYLANCE_JSON_PASSWORD = "password"  # pragma: allowlist secret
 CYLANCE_JSON_REGION_CODE = "region_code"
 
 CYLANCE_JSON_TENANT_ID = "tenant_id"
 CYLANCE_JSON_APPLICATION_ID = "application_id"
-CYLANCE_JSON_APPLICATION_SECRET = "application_secret"
+CYLANCE_JSON_APPLICATION_SECRET = "application_secret"  # pragma: allowlist secret
 
 CYLANCE_REGION_CODES = {
     "Asia-Pacific - North": "-apne1",
@@ -26,7 +26,7 @@ CYLANCE_REGION_CODES = {
     "Europe - Central": "-euc1",
     "Government": ".us",
     "North America": "",
-    "South America": "-sae1"
+    "South America": "-sae1",
 }
 
 CYLANCE_AUTH_TOKEN_ERR = "Could not generate an auth token"
