@@ -21,22 +21,6 @@
     "latest_tested_versions": [
         "Cylence Protect Cloud, API v2"
     ],
-    "pip_dependencies": {
-        "wheel": [
-            {
-                "module": "PyJWT",
-                "input_file": "wheels/py3/PyJWT-2.4.0-py3-none-any.whl"
-            },
-            {
-                "module": "beautifulsoup4",
-                "input_file": "wheels/py3/beautifulsoup4-4.9.1-py3-none-any.whl"
-            },
-            {
-                "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.3.2.post1-py3-none-any.whl"
-            }
-        ]
-    },
     "configuration": {
         "tenant_id": {
             "description": "Tenant unique identifier",
@@ -1926,14 +1910,6 @@
             {
                 "module": "PyJWT",
                 "input_file": "wheels/py3/PyJWT-2.4.0-py3-none-any.whl"
-            },
-            {
-                "module": "beautifulsoup4",
-                "input_file": "wheels/py3/beautifulsoup4-4.9.1-py3-none-any.whl"
-            },
-            {
-                "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.5-py3-none-any.whl"
             }
         ]
     }
