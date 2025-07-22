@@ -11,7 +11,7 @@
     "publisher": "Splunk",
     "license": "Copyright (c) 2018-2025 Splunk Inc.",
     "app_version": "2.0.6",
-    "python_version": "3",
+    "python_version": ["3.9", "3.13"],
     "utctime_updated": "2022-08-16T17:04:06.000000Z",
     "package_name": "phantom_cylanceprotect",
     "main_module": "cylance_connector.py",
