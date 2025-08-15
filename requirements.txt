@@ -1,2 +1,1 @@
-beautifulsoup4==4.9.1
-PyJWT==2.4.0
+pyjwt==2.10.1

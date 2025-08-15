@@ -1,9 +1,9 @@
 # CylancePROTECT
 
-Publisher: Splunk \
-Connector Version: 2.0.6 \
-Product Vendor: Cylance \
-Product Name: CylancePROTECT \
+Publisher: Splunk <br>
+Connector Version: 2.0.6 <br>
+Product Vendor: Cylance <br>
+Product Name: CylancePROTECT <br>
 Minimum Product Version: 5.3.0
 
 This app supports the various investigative, containment, and corrective actions on CylancePROTECT
@@ -38,25 +38,25 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using the supplied configuration \
-[list endpoints](#action-list-endpoints) - List all the endpoints/sensors configured on the device \
-[list threats](#action-list-threats) - Get a list of threats on the specific device \
-[get system info](#action-get-system-info) - Get information about an endpoint \
-[hunt file](#action-hunt-file) - Hunt a file on the network using the hash \
-[get global list](#action-get-global-list) - Retrieve the hashes for the given type of list \
-[unblock hash](#action-unblock-hash) - Unblock a file hash \
-[block hash](#action-block-hash) - Block a file hash \
-[get file](#action-get-file) - Download a file to the vault \
-[get file info](#action-get-file-info) - Get information about a file \
-[update zone](#action-update-zone) - Update the details of a zone \
-[list policies](#action-list-policies) - Get a list of tenant policies \
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using the supplied configuration <br>
+[list endpoints](#action-list-endpoints) - List all the endpoints/sensors configured on the device <br>
+[list threats](#action-list-threats) - Get a list of threats on the specific device <br>
+[get system info](#action-get-system-info) - Get information about an endpoint <br>
+[hunt file](#action-hunt-file) - Hunt a file on the network using the hash <br>
+[get global list](#action-get-global-list) - Retrieve the hashes for the given type of list <br>
+[unblock hash](#action-unblock-hash) - Unblock a file hash <br>
+[block hash](#action-block-hash) - Block a file hash <br>
+[get file](#action-get-file) - Download a file to the vault <br>
+[get file info](#action-get-file-info) - Get information about a file <br>
+[update zone](#action-update-zone) - Update the details of a zone <br>
+[list policies](#action-list-policies) - Get a list of tenant policies <br>
 [list zones](#action-list-zones) - Get a list of tenant zones
 
 ## action: 'test connectivity'
 
 Validate the asset configuration for connectivity using the supplied configuration
 
-Type: **test** \
+Type: **test** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -71,7 +71,7 @@ No Output
 
 List all the endpoints/sensors configured on the device
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -109,7 +109,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get a list of threats on the specific device
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -143,7 +143,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get information about an endpoint
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -191,7 +191,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Hunt a file on the network using the hash
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -227,7 +227,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Retrieve the hashes for the given type of list
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -265,7 +265,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Unblock a file hash
 
-Type: **correct** \
+Type: **correct** <br>
 Read only: **False**
 
 #### Action Parameters
@@ -292,7 +292,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Block a file hash
 
-Type: **contain** \
+Type: **contain** <br>
 Read only: **False**
 
 Action parameter 'category' is required only if the list_type value is GlobalSafe.
@@ -325,7 +325,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Download a file to the vault
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -352,7 +352,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get information about a file
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -394,7 +394,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Update the details of a zone
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 #### Action Parameters
@@ -425,7 +425,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get a list of tenant policies
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -455,7 +455,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get a list of tenant zones
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
