@@ -11,7 +11,7 @@
     "publisher": "Splunk",
     "license": "Copyright (c) 2018-2025 Splunk Inc.",
     "app_version": "2.0.6",
-    "python_version": "3",
+    "python_version": "3.9, 3.13",
     "utctime_updated": "2022-08-16T17:04:06.000000Z",
     "package_name": "phantom_cylanceprotect",
     "main_module": "cylance_connector.py",
@@ -1925,15 +1925,15 @@
         "wheel": [
             {
                 "module": "PyJWT",
-                "input_file": "wheels/py3/PyJWT-2.4.0-py3-none-any.whl"
-            },
+                "input_file": "wheels/py3/PyJWT-2.10.1-py3-none-any.whl"
+            }
+        ]
+    },
+    "pip313_dependencies": {
+        "wheel": [
             {
-                "module": "beautifulsoup4",
-                "input_file": "wheels/py3/beautifulsoup4-4.9.1-py3-none-any.whl"
-            },
-            {
-                "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.5-py3-none-any.whl"
+                "module": "PyJWT",
+                "input_file": "wheels/py3/PyJWT-2.10.1-py3-none-any.whl"
             }
         ]
     }
