@@ -16,12 +16,13 @@
 #
 # Phantom App imports
 import json
+import hashlib
 import os
 import shutil
 import sys
 import uuid
 from datetime import datetime, timedelta
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from zipfile import ZipFile
 
 import encryption_helper
@@ -142,7 +143,21 @@ class CylanceConnector(BaseConnector):
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
-    def _download_file_to_vault(self, action_result, url, file_name):
+    def _is_allowed_download_url(self, url):
+        try:
+            parsed_url = urlsplit(url)
+            configured_url = urlsplit(self._base_url)
+            return (
+                parsed_url.scheme == "https"
+                and parsed_url.hostname == configured_url.hostname
+                and parsed_url.port in (None, 443)
+                and parsed_url.username is None
+                and parsed_url.password is None
+            )
+        except ValueError:
+            return False
+
+    def _download_file_to_vault(self, action_result, url, file_name, expected_sha256):
         """Download a file and add it to the vault"""
 
         guid = uuid.uuid4()
@@ -162,40 +177,58 @@ class CylanceConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, msg, e)
 
         try:
-            r = requests.get(url, timeout=DEFAULT_REQUEST_TIMEOUT)
-        except:
-            return action_result.set_status(phantom.APP_ERROR, "Error downloading file")
+            if not self._is_allowed_download_url(url):
+                return action_result.set_status(phantom.APP_ERROR, "Cylance returned an unapproved file download URL")
 
-        with open(zip_path, "wb") as f:
-            f.write(r.content)
-            f.close()
+            try:
+                response = requests.get(url, timeout=DEFAULT_REQUEST_TIMEOUT, allow_redirects=False)
+            except requests.RequestException as e:
+                return action_result.set_status(phantom.APP_ERROR, f"Error downloading file: {e!s}")
 
-        zf = ZipFile(zip_path)
-        ex_name = zf.namelist()[0]
-        vault_path = f"{tmp_dir}/{ex_name}"
+            if response.status_code != requests.codes.ok:
+                return action_result.set_status(
+                    phantom.APP_ERROR, f"File download failed with HTTP status {response.status_code}"
+                )
 
-        try:
-            # All the zip files are encrypted with the password 'infected'
-            zf.extractall(tmp_dir, pwd=b"infected")
-        except:
-            return action_result.set_status(phantom.APP_ERROR, "Error extracting zip file")
+            with open(zip_path, "wb") as zip_file:
+                zip_file.write(response.content)
 
-        vault_ret = Vault.add_attachment(vault_path, self.get_container_id(), file_name=ex_name)
-        if vault_ret.get("succeeded"):
-            action_result.set_status(phantom.APP_SUCCESS, "Transferred file")
+            try:
+                with ZipFile(zip_path) as zip_archive:
+                    members = [member for member in zip_archive.infolist() if not member.is_dir()]
+                    if len(members) != 1:
+                        return action_result.set_status(phantom.APP_ERROR, "Expected exactly one file in the downloaded archive")
+
+                    member = members[0]
+                    extracted_name = os.path.basename(member.filename)
+                    if not extracted_name or member.filename != extracted_name:
+                        return action_result.set_status(phantom.APP_ERROR, "Archive contains an unsafe file name")
+
+                    vault_path = os.path.join(tmp_dir, extracted_name)
+                    digest = hashlib.sha256()
+                    with zip_archive.open(member, pwd=b"infected") as source, open(vault_path, "wb") as destination:
+                        while chunk := source.read(1024 * 1024):
+                            digest.update(chunk)
+                            destination.write(chunk)
+            except Exception as e:
+                return action_result.set_status(phantom.APP_ERROR, f"Error extracting zip file: {e!s}")
+
+            if digest.hexdigest().lower() != expected_sha256.lower():
+                return action_result.set_status(phantom.APP_ERROR, "Downloaded file SHA-256 does not match the requested hash")
+
+            vault_ret = Vault.add_attachment(vault_path, self.get_container_id(), file_name=extracted_name)
+            if not vault_ret.get("succeeded"):
+                return action_result.set_status(phantom.APP_ERROR, "Error adding file to vault")
+
             summary = {
                 phantom.APP_JSON_VAULT_ID: vault_ret[phantom.APP_JSON_HASH],
-                phantom.APP_JSON_NAME: ex_name,
+                phantom.APP_JSON_NAME: extracted_name,
                 phantom.APP_JSON_SIZE: vault_ret.get(phantom.APP_JSON_SIZE),
             }
             action_result.update_summary(summary)
-            action_result.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
-        else:
-            action_result.set_status(phantom.APP_ERROR, "Error adding file to vault")
-
-        shutil.rmtree(tmp_dir)
-
-        return action_result.get_status()
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
     def _get_access_token(self, action_result):
         """
@@ -552,7 +585,7 @@ class CylanceConnector(BaseConnector):
         url = response["url"]
         file_name = f"{sha256_hash}.zip"
 
-        ret_val = self._download_file_to_vault(action_result, url, file_name)
+        ret_val = self._download_file_to_vault(action_result, url, file_name, sha256_hash)
 
         if phantom.is_fail(ret_val):
             msg = action_result.get_message()
