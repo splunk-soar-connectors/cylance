@@ -1,6 +1,6 @@
 # File: cylance_connector.py
 #
-# Copyright (c) 2018-2025 Splunk Inc.
+# Copyright (c) 2018-2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 #
 #
 # Phantom App imports
-import json
 import hashlib
+import json
 import os
 import shutil
 import sys
@@ -187,9 +187,7 @@ class CylanceConnector(BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, f"Error downloading file: {e!s}")
 
             if response.status_code != requests.codes.ok:
-                return action_result.set_status(
-                    phantom.APP_ERROR, f"File download failed with HTTP status {response.status_code}"
-                )
+                return action_result.set_status(phantom.APP_ERROR, f"File download failed with HTTP status {response.status_code}")
 
             with open(zip_path, "wb") as zip_file:
                 zip_file.write(response.content)
@@ -682,9 +680,7 @@ class CylanceConnector(BaseConnector):
         request = {"name": name, "policy_id": policy_id, "criticality": criticality}
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper(
-            f"/zones/v2/{quote(unique_zone_id, safe='')}", action_result, json=request, method="put"
-        )
+        ret_val, response = self._make_rest_call_helper(f"/zones/v2/{quote(unique_zone_id, safe='')}", action_result, json=request, method="put")
 
         if phantom.is_fail(ret_val):
             return action_result.get_status()
