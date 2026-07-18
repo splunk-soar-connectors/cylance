@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 from urllib.parse import quote
 from zipfile import ZipFile
 
+import encryption_helper
 import jwt
 import phantom.app as phantom
 import requests
@@ -242,8 +243,9 @@ class CylanceConnector(BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
-        self._state["_access_token"] = access_token
         self._access_token = access_token
+        self._state["_access_token"] = encryption_helper.encrypt(access_token, self.get_asset_id())
+        self._state["_access_token_encrypted"] = True
         self.save_state(self._state)
 
         return action_result.set_status(phantom.APP_SUCCESS)
@@ -706,13 +708,26 @@ class CylanceConnector(BaseConnector):
 
     def initialize(self):
         self._state = self.load_state()
+        if not isinstance(self._state, dict):
+            self._state = {}
         config = self.get_config()
         self._region_code = config[CYLANCE_JSON_REGION_CODE]
 
         region_code_formatted = CYLANCE_REGION_CODES.get(self._region_code)
 
         self._base_url = f"https://protectapi{region_code_formatted}.cylance.com"
-        self._access_token = self._state.get("_access_token", "")
+        encrypted_access_token = self._state.get("_access_token", "")
+        if encrypted_access_token and self._state.get("_access_token_encrypted"):
+            try:
+                self._access_token = encryption_helper.decrypt(encrypted_access_token, self.get_asset_id())
+            except Exception as e:
+                self.debug_print(f"Unable to decrypt cached access token; requesting a new token: {e!s}")
+                self._state.pop("_access_token", None)
+                self._state.pop("_access_token_encrypted", None)
+        else:
+            # Discard cleartext state written by older connector versions.
+            self._state.pop("_access_token", None)
+            self._state.pop("_access_token_encrypted", None)
 
         return phantom.APP_SUCCESS
 
