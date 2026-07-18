@@ -40,6 +40,7 @@ from cylance_consts import *
 
 DEFAULT_REQUEST_TIMEOUT = 30  # in seconds
 MAX_PAGINATION_ITEMS = 10000
+GLOBAL_LIST_TYPE_IDS = {"GlobalQuarantine": 0, "GlobalSafe": 1}
 
 
 class RetVal(tuple):
@@ -495,12 +496,7 @@ class CylanceConnector(BaseConnector):
         list_type_id = param.get("list_type_id")
         limit = param.get("limit")
 
-        params = dict()
-
-        if list_type_id == "GlobalQuarantine":
-            params["listTypeId"] = 0
-        elif list_type_id == "GlobalSafe":
-            params["listTypeId"] = 1
+        params = {"listTypeId": GLOBAL_LIST_TYPE_IDS[list_type_id]}
 
         url = "/globallists/v2"
 
@@ -560,7 +556,34 @@ class CylanceConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             message = action_result.get_message()
             if "There's already an entry for this threat" in message:
-                return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_BLOCK_HASH_ALREADY_BLOCKED_SUCC)
+                action_result.set_status(phantom.APP_SUCCESS)
+                requested_items = self._paginator(
+                    "/globallists/v2",
+                    action_result,
+                    params={"listTypeId": GLOBAL_LIST_TYPE_IDS[list_type]},
+                )
+                if requested_items is None:
+                    return action_result.set_status(phantom.APP_ERROR, "Unable to verify the hash's current global list")
+
+                if any(str(item.get("sha256", "")).lower() == sha256_hash.lower() for item in requested_items):
+                    return action_result.set_status(phantom.APP_SUCCESS, f"Hash is already on the {list_type} list")
+
+                other_list_type = "GlobalSafe" if list_type == "GlobalQuarantine" else "GlobalQuarantine"
+                other_items = self._paginator(
+                    "/globallists/v2",
+                    action_result,
+                    params={"listTypeId": GLOBAL_LIST_TYPE_IDS[other_list_type]},
+                )
+                if other_items is None:
+                    return action_result.set_status(phantom.APP_ERROR, "Unable to verify the hash's current global list")
+
+                if any(str(item.get("sha256", "")).lower() == sha256_hash.lower() for item in other_items):
+                    return action_result.set_status(
+                        phantom.APP_ERROR,
+                        f"Hash is on the {other_list_type} list, not the requested {list_type} list",
+                    )
+
+                return action_result.set_status(phantom.APP_ERROR, "Hash was not found on either Cylance global list")
             return action_result.get_status()
 
         action_result.add_data(response)
