@@ -21,6 +21,7 @@ import shutil
 import sys
 import uuid
 from datetime import datetime, timedelta
+from urllib.parse import quote
 from zipfile import ZipFile
 
 import jwt
@@ -377,7 +378,7 @@ class CylanceConnector(BaseConnector):
         unique_device_id = param["unique_device_id"]
         limit = param.get("limit")
 
-        url = f"/devices/v2/{unique_device_id}/threats"
+        url = f"/devices/v2/{quote(unique_device_id, safe='')}/threats"
 
         # make rest call
         threats = self._paginator(url, action_result, limit=limit)
@@ -403,7 +404,9 @@ class CylanceConnector(BaseConnector):
         unique_device_id = param["unique_device_id"]
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper(f"/devices/v2/{unique_device_id}", action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper(
+            f"/devices/v2/{quote(unique_device_id, safe='')}", action_result, params=None, headers=None
+        )
 
         if phantom.is_fail(ret_val):
             return action_result.get_status()
@@ -614,7 +617,9 @@ class CylanceConnector(BaseConnector):
         request = {"name": name, "policy_id": policy_id, "criticality": criticality}
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper(f"/zones/v2/{unique_zone_id}", action_result, json=request, method="put")
+        ret_val, response = self._make_rest_call_helper(
+            f"/zones/v2/{quote(unique_zone_id, safe='')}", action_result, json=request, method="put"
+        )
 
         if phantom.is_fail(ret_val):
             return action_result.get_status()
