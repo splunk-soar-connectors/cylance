@@ -38,6 +38,7 @@ from cylance_consts import *
 
 
 DEFAULT_REQUEST_TIMEOUT = 30  # in seconds
+MAX_PAGINATION_ITEMS = 10000
 
 
 class RetVal(tuple):
@@ -318,16 +319,14 @@ class CylanceConnector(BaseConnector):
 
     def _paginator(self, endpoint, action_result, params=None, limit=None):
         items_list = list()
-
         page = 0
+        params = dict(params or {})
 
         if limit == 0 or (limit and (not str(limit).isdigit() or limit <= 0)):
             action_result.set_status(phantom.APP_ERROR, CYLANCE_ERR_INVALID_PARAM.format(param="limit"))
             return None
 
         while True:
-            if not params:
-                params = dict()
             page = page + 1
             params["page"] = page
             params["page_size"] = DEFAULT_MAX_RESULTS
@@ -337,13 +336,21 @@ class CylanceConnector(BaseConnector):
             if phantom.is_fail(ret_val):
                 return None
 
-            items_list.extend(response.get("page_items"))
+            page_items = response.get("page_items") or []
+            items_list.extend(page_items)
 
             if limit and len(items_list) >= limit:
                 return items_list[:limit]
 
-            if len(response.get("page_items")) < DEFAULT_MAX_RESULTS:
+            if len(page_items) < DEFAULT_MAX_RESULTS:
                 break
+
+            if len(items_list) >= MAX_PAGINATION_ITEMS:
+                action_result.set_status(
+                    phantom.APP_ERROR,
+                    f"Pagination exceeded the safety limit of {MAX_PAGINATION_ITEMS} items. Provide a smaller limit.",
+                )
+                return None
 
         return items_list
 
