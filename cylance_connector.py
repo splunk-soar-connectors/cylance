@@ -1,6 +1,6 @@
 # File: cylance_connector.py
 #
-# Copyright (c) 2018-2025 Splunk Inc.
+# Copyright (c) 2018-2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,17 @@
 #
 #
 # Phantom App imports
+import hashlib
 import json
 import os
 import shutil
 import sys
 import uuid
 from datetime import datetime, timedelta
+from urllib.parse import quote, urlsplit
 from zipfile import ZipFile
 
+import encryption_helper
 import jwt
 import phantom.app as phantom
 import requests
@@ -36,6 +39,8 @@ from cylance_consts import *
 
 
 DEFAULT_REQUEST_TIMEOUT = 30  # in seconds
+MAX_PAGINATION_ITEMS = 10000
+GLOBAL_LIST_TYPE_IDS = {"GlobalQuarantine": 0, "GlobalSafe": 1}
 
 
 class RetVal(tuple):
@@ -139,7 +144,21 @@ class CylanceConnector(BaseConnector):
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
-    def _download_file_to_vault(self, action_result, url, file_name):
+    def _is_allowed_download_url(self, url):
+        try:
+            parsed_url = urlsplit(url)
+            configured_url = urlsplit(self._base_url)
+            return (
+                parsed_url.scheme == "https"
+                and parsed_url.hostname == configured_url.hostname
+                and parsed_url.port in (None, 443)
+                and parsed_url.username is None
+                and parsed_url.password is None
+            )
+        except ValueError:
+            return False
+
+    def _download_file_to_vault(self, action_result, url, file_name, expected_sha256):
         """Download a file and add it to the vault"""
 
         guid = uuid.uuid4()
@@ -159,40 +178,56 @@ class CylanceConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, msg, e)
 
         try:
-            r = requests.get(url, timeout=DEFAULT_REQUEST_TIMEOUT)
-        except:
-            return action_result.set_status(phantom.APP_ERROR, "Error downloading file")
+            if not self._is_allowed_download_url(url):
+                return action_result.set_status(phantom.APP_ERROR, "Cylance returned an unapproved file download URL")
 
-        with open(zip_path, "wb") as f:
-            f.write(r.content)
-            f.close()
+            try:
+                response = requests.get(url, timeout=DEFAULT_REQUEST_TIMEOUT, allow_redirects=False)
+            except requests.RequestException as e:
+                return action_result.set_status(phantom.APP_ERROR, f"Error downloading file: {e!s}")
 
-        zf = ZipFile(zip_path)
-        ex_name = zf.namelist()[0]
-        vault_path = f"{tmp_dir}/{ex_name}"
+            if response.status_code != requests.codes.ok:
+                return action_result.set_status(phantom.APP_ERROR, f"File download failed with HTTP status {response.status_code}")
 
-        try:
-            # All the zip files are encrypted with the password 'infected'
-            zf.extractall(tmp_dir, pwd=b"infected")
-        except:
-            return action_result.set_status(phantom.APP_ERROR, "Error extracting zip file")
+            with open(zip_path, "wb") as zip_file:
+                zip_file.write(response.content)
 
-        vault_ret = Vault.add_attachment(vault_path, self.get_container_id(), file_name=ex_name)
-        if vault_ret.get("succeeded"):
-            action_result.set_status(phantom.APP_SUCCESS, "Transferred file")
+            try:
+                with ZipFile(zip_path) as zip_archive:
+                    members = [member for member in zip_archive.infolist() if not member.is_dir()]
+                    if len(members) != 1:
+                        return action_result.set_status(phantom.APP_ERROR, "Expected exactly one file in the downloaded archive")
+
+                    member = members[0]
+                    extracted_name = os.path.basename(member.filename)
+                    if not extracted_name or member.filename != extracted_name:
+                        return action_result.set_status(phantom.APP_ERROR, "Archive contains an unsafe file name")
+
+                    vault_path = os.path.join(tmp_dir, extracted_name)
+                    digest = hashlib.sha256()
+                    with zip_archive.open(member, pwd=b"infected") as source, open(vault_path, "wb") as destination:
+                        while chunk := source.read(1024 * 1024):
+                            digest.update(chunk)
+                            destination.write(chunk)
+            except Exception as e:
+                return action_result.set_status(phantom.APP_ERROR, f"Error extracting zip file: {e!s}")
+
+            if digest.hexdigest().lower() != expected_sha256.lower():
+                return action_result.set_status(phantom.APP_ERROR, "Downloaded file SHA-256 does not match the requested hash")
+
+            vault_ret = Vault.add_attachment(vault_path, self.get_container_id(), file_name=extracted_name)
+            if not vault_ret.get("succeeded"):
+                return action_result.set_status(phantom.APP_ERROR, "Error adding file to vault")
+
             summary = {
                 phantom.APP_JSON_VAULT_ID: vault_ret[phantom.APP_JSON_HASH],
-                phantom.APP_JSON_NAME: ex_name,
+                phantom.APP_JSON_NAME: extracted_name,
                 phantom.APP_JSON_SIZE: vault_ret.get(phantom.APP_JSON_SIZE),
             }
             action_result.update_summary(summary)
-            action_result.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
-        else:
-            action_result.set_status(phantom.APP_ERROR, "Error adding file to vault")
-
-        shutil.rmtree(tmp_dir)
-
-        return action_result.get_status()
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully added file to vault")
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
     def _get_access_token(self, action_result):
         """
@@ -241,8 +276,9 @@ class CylanceConnector(BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, CYLANCE_ACCESS_TOKEN_ERR)
 
-        self._state["_access_token"] = access_token
         self._access_token = access_token
+        self._state["_access_token"] = encryption_helper.encrypt(access_token, self.get_asset_id())
+        self._state["_access_token_encrypted"] = True
         self.save_state(self._state)
 
         return action_result.set_status(phantom.APP_SUCCESS)
@@ -315,16 +351,14 @@ class CylanceConnector(BaseConnector):
 
     def _paginator(self, endpoint, action_result, params=None, limit=None):
         items_list = list()
-
         page = 0
+        params = dict(params or {})
 
         if limit == 0 or (limit and (not str(limit).isdigit() or limit <= 0)):
             action_result.set_status(phantom.APP_ERROR, CYLANCE_ERR_INVALID_PARAM.format(param="limit"))
             return None
 
         while True:
-            if not params:
-                params = dict()
             page = page + 1
             params["page"] = page
             params["page_size"] = DEFAULT_MAX_RESULTS
@@ -334,13 +368,21 @@ class CylanceConnector(BaseConnector):
             if phantom.is_fail(ret_val):
                 return None
 
-            items_list.extend(response.get("page_items"))
+            page_items = response.get("page_items") or []
+            items_list.extend(page_items)
 
             if limit and len(items_list) >= limit:
                 return items_list[:limit]
 
-            if len(response.get("page_items")) < DEFAULT_MAX_RESULTS:
+            if len(page_items) < DEFAULT_MAX_RESULTS:
                 break
+
+            if len(items_list) >= MAX_PAGINATION_ITEMS:
+                action_result.set_status(
+                    phantom.APP_ERROR,
+                    f"Pagination exceeded the safety limit of {MAX_PAGINATION_ITEMS} items. Provide a smaller limit.",
+                )
+                return None
 
         return items_list
 
@@ -377,7 +419,7 @@ class CylanceConnector(BaseConnector):
         unique_device_id = param["unique_device_id"]
         limit = param.get("limit")
 
-        url = f"/devices/v2/{unique_device_id}/threats"
+        url = f"/devices/v2/{quote(unique_device_id, safe='')}/threats"
 
         # make rest call
         threats = self._paginator(url, action_result, limit=limit)
@@ -403,7 +445,9 @@ class CylanceConnector(BaseConnector):
         unique_device_id = param["unique_device_id"]
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper(f"/devices/v2/{unique_device_id}", action_result, params=None, headers=None)
+        ret_val, response = self._make_rest_call_helper(
+            f"/devices/v2/{quote(unique_device_id, safe='')}", action_result, params=None, headers=None
+        )
 
         if phantom.is_fail(ret_val):
             return action_result.get_status()
@@ -450,12 +494,7 @@ class CylanceConnector(BaseConnector):
         list_type_id = param.get("list_type_id")
         limit = param.get("limit")
 
-        params = dict()
-
-        if list_type_id == "GlobalQuarantine":
-            params["listTypeId"] = 0
-        elif list_type_id == "GlobalSafe":
-            params["listTypeId"] = 1
+        params = {"listTypeId": GLOBAL_LIST_TYPE_IDS[list_type_id]}
 
         url = "/globallists/v2"
 
@@ -515,7 +554,34 @@ class CylanceConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             message = action_result.get_message()
             if "There's already an entry for this threat" in message:
-                return action_result.set_status(phantom.APP_SUCCESS, CYLANCE_BLOCK_HASH_ALREADY_BLOCKED_SUCC)
+                action_result.set_status(phantom.APP_SUCCESS)
+                requested_items = self._paginator(
+                    "/globallists/v2",
+                    action_result,
+                    params={"listTypeId": GLOBAL_LIST_TYPE_IDS[list_type]},
+                )
+                if requested_items is None:
+                    return action_result.set_status(phantom.APP_ERROR, "Unable to verify the hash's current global list")
+
+                if any(str(item.get("sha256", "")).lower() == sha256_hash.lower() for item in requested_items):
+                    return action_result.set_status(phantom.APP_SUCCESS, f"Hash is already on the {list_type} list")
+
+                other_list_type = "GlobalSafe" if list_type == "GlobalQuarantine" else "GlobalQuarantine"
+                other_items = self._paginator(
+                    "/globallists/v2",
+                    action_result,
+                    params={"listTypeId": GLOBAL_LIST_TYPE_IDS[other_list_type]},
+                )
+                if other_items is None:
+                    return action_result.set_status(phantom.APP_ERROR, "Unable to verify the hash's current global list")
+
+                if any(str(item.get("sha256", "")).lower() == sha256_hash.lower() for item in other_items):
+                    return action_result.set_status(
+                        phantom.APP_ERROR,
+                        f"Hash is on the {other_list_type} list, not the requested {list_type} list",
+                    )
+
+                return action_result.set_status(phantom.APP_ERROR, "Hash was not found on either Cylance global list")
             return action_result.get_status()
 
         action_result.add_data(response)
@@ -540,7 +606,7 @@ class CylanceConnector(BaseConnector):
         url = response["url"]
         file_name = f"{sha256_hash}.zip"
 
-        ret_val = self._download_file_to_vault(action_result, url, file_name)
+        ret_val = self._download_file_to_vault(action_result, url, file_name, sha256_hash)
 
         if phantom.is_fail(ret_val):
             msg = action_result.get_message()
@@ -614,7 +680,7 @@ class CylanceConnector(BaseConnector):
         request = {"name": name, "policy_id": policy_id, "criticality": criticality}
 
         # make rest call
-        ret_val, response = self._make_rest_call_helper(f"/zones/v2/{unique_zone_id}", action_result, json=request, method="put")
+        ret_val, response = self._make_rest_call_helper(f"/zones/v2/{quote(unique_zone_id, safe='')}", action_result, json=request, method="put")
 
         if phantom.is_fail(ret_val):
             return action_result.get_status()
@@ -701,13 +767,26 @@ class CylanceConnector(BaseConnector):
 
     def initialize(self):
         self._state = self.load_state()
+        if not isinstance(self._state, dict):
+            self._state = {}
         config = self.get_config()
         self._region_code = config[CYLANCE_JSON_REGION_CODE]
 
         region_code_formatted = CYLANCE_REGION_CODES.get(self._region_code)
 
         self._base_url = f"https://protectapi{region_code_formatted}.cylance.com"
-        self._access_token = self._state.get("_access_token", "")
+        encrypted_access_token = self._state.get("_access_token", "")
+        if encrypted_access_token and self._state.get("_access_token_encrypted"):
+            try:
+                self._access_token = encryption_helper.decrypt(encrypted_access_token, self.get_asset_id())
+            except Exception as e:
+                self.debug_print(f"Unable to decrypt cached access token; requesting a new token: {e!s}")
+                self._state.pop("_access_token", None)
+                self._state.pop("_access_token_encrypted", None)
+        else:
+            # Discard cleartext state written by older connector versions.
+            self._state.pop("_access_token", None)
+            self._state.pop("_access_token_encrypted", None)
 
         return phantom.APP_SUCCESS
 
