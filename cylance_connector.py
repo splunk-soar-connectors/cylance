@@ -36,6 +36,7 @@ from phantom.vault import Vault as Vault
 
 # Usage of the consts file is recommended
 from cylance_consts import *
+from cylance_validation import normalize_uuid
 
 
 DEFAULT_REQUEST_TIMEOUT = 30  # in seconds
@@ -416,7 +417,10 @@ class CylanceConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        unique_device_id = param["unique_device_id"]
+        try:
+            unique_device_id = normalize_uuid(param["unique_device_id"])
+        except (AttributeError, TypeError, ValueError):
+            return action_result.set_status(phantom.APP_ERROR, "Invalid unique_device_id: expected a UUID")
         limit = param.get("limit")
 
         url = f"/devices/v2/{quote(unique_device_id, safe='')}/threats"
@@ -442,7 +446,10 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Required values can be accessed directly
-        unique_device_id = param["unique_device_id"]
+        try:
+            unique_device_id = normalize_uuid(param["unique_device_id"])
+        except (AttributeError, TypeError, ValueError):
+            return action_result.set_status(phantom.APP_ERROR, "Invalid unique_device_id: expected a UUID")
 
         # make rest call
         ret_val, response = self._make_rest_call_helper(
@@ -672,7 +679,10 @@ class CylanceConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         # Required values can be accessed directly
-        unique_zone_id = param["unique_zone_id"]
+        try:
+            unique_zone_id = normalize_uuid(param["unique_zone_id"])
+        except (AttributeError, TypeError, ValueError):
+            return action_result.set_status(phantom.APP_ERROR, "Invalid unique_zone_id: expected a UUID")
         name = param["name"]
         policy_id = param["policy_id"]
         criticality = param["criticality"]
