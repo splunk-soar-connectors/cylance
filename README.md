@@ -1,7 +1,7 @@
 # CylancePROTECT
 
 Publisher: Splunk <br>
-Connector Version: 2.0.8 <br>
+Connector Version: 2.0.9 <br>
 Product Vendor: Cylance <br>
 Product Name: CylancePROTECT <br>
 Minimum Product Version: 5.3.0
