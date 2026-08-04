@@ -1,1 +1,3 @@
 **Unreleased**
+
+* Validate device and zone identifiers as UUIDs before building API paths.
