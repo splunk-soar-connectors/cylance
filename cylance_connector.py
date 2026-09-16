@@ -340,7 +340,7 @@ class CylanceConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         # make rest call
-        ret_val, response = self._make_rest_call_helper("/users/v2", action_result, params=None, headers=None)
+        ret_val, _response = self._make_rest_call_helper("/users/v2", action_result, params=None, headers=None)
 
         if phantom.is_fail(ret_val):
             self.save_progress("Test Connectivity Failed")
